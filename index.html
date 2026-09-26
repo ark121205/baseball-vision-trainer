@@ -51,12 +51,6 @@ padding:12px 16px;border-radius:13px;font-weight:800;text-align:center;backdrop-
 table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:7px 3px;border-bottom:1px solid var(--line);text-align:center}
 th{color:#bcd0ef}.bar{height:8px;background:#08172e;border-radius:8px;overflow:hidden}.bar>div{height:100%;background:#5ab9ff}
 
-.numberGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
-.numberGrid button{aspect-ratio:1/1;font-size:34px;font-weight:900;background:#173d78;border:2px solid rgba(255,255,255,.08)}
-.numberGrid button.done{opacity:.22;transform:scale(.96)}
-.numberGrid button.wrong{outline:3px solid #ff6f82}
-.numberInfo{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:14px;color:#cfe1ff}
-.bestBox{margin-top:10px;padding:10px;border-radius:12px;background:#0b1a36;text-align:center;font-weight:800}
 .celebrate{font-size:22px;font-weight:900;line-height:1.45}
 
 
@@ -82,12 +76,31 @@ th{color:#bcd0ef}.bar{height:8px;background:#08172e;border-radius:8px;overflow:h
 .quizLevels .selected{outline:3px solid #f4d35e}
 .quizSource{margin-top:10px;font-size:11px;line-height:1.45;color:#91a8cf}
 
+
+.numberLevelBox{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.numberLevelBox button{min-height:48px;font-weight:900}
+.numberGrid{display:grid;gap:8px;margin-top:12px}
+.numberGrid.grid3{grid-template-columns:repeat(3,1fr)}
+.numberGrid.grid4{grid-template-columns:repeat(4,1fr)}
+.numberGrid.grid5{grid-template-columns:repeat(5,1fr)}
+.numberGrid button{aspect-ratio:1/1;font-size:30px;font-weight:900;background:#173d78;border:2px solid rgba(255,255,255,.08);padding:2px}
+.numberGrid.grid4 button{font-size:24px}
+.numberGrid.grid5 button{font-size:20px}
+.numberGrid button.done{opacity:.20;transform:scale(.96)}
+.numberGrid button.wrong{outline:3px solid #ff6f82}
+.numberGrid button.hiddenNumber{color:transparent}
+.numberGrid button.flashNumber{color:white;background:#24569b;box-shadow:0 0 0 3px #64baff inset}
+.numberInfo{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:14px;color:#cfe1ff}
+.bestBox{margin-top:10px;padding:10px;border-radius:12px;background:#0b1a36;text-align:center;font-weight:800}
+.numberHelp{margin-top:8px;font-size:12px;color:#9db1d5;line-height:1.5}
+.quizNext{width:100%;margin-top:10px;background:linear-gradient(135deg,#2797ea,#71c5ff);color:#04152b;font-weight:900}
+
 </style>
 </head>
 <body>
 <div class="app">
   <h1>⚾ 野球ビジョントレーナー</h1>
-  <div class="sub">動体視力・瞬間視・選球眼・反応速度　<span style="opacity:.65">v0.9</span></div>
+  <div class="sub">動体視力・瞬間視・選球眼・反応速度　<span style="opacity:.65">v1.0</span></div>
 
 <section class="card">
   <div class="row">
@@ -175,12 +188,23 @@ th{color:#bcd0ef}.bar{height:8px;background:#08172e;border-radius:8px;overflow:h
       <button id="reactionBtn" class="primary">光ったらタップ</button>
     </div>
     <div id="numbersAns" class="hidden">
-      <div class="numberInfo">
-        <span>次：<strong id="nextNumber">1</strong></span>
-        <span>タイム：<strong id="numberTime">0.00</strong> 秒</span>
+      <div id="numberLevelSelect">
+        <div class="quizQuestion">数字タップの難易度を選んでください</div>
+        <div class="numberLevelBox">
+          <button data-number-level="beginner">🌱 初級<br><span class="sub">3×3</span></button>
+          <button data-number-level="intermediate">⚾ 中級<br><span class="sub">4×4</span></button>
+          <button data-number-level="advanced">🔥 上級<br><span class="sub">5×5・瞬間表示</span></button>
+        </div>
       </div>
-      <div id="numberGrid" class="numberGrid"></div>
-      <div class="bestBox">自己ベスト：<span id="numberBest">--</span></div>
+      <div id="numberPlay" class="hidden">
+        <div class="numberInfo">
+          <span><strong id="numberLevelName"></strong>　次：<strong id="nextNumber">1</strong></span>
+          <span>タイム：<strong id="numberTime">0.00</strong> 秒</span>
+        </div>
+        <div id="numberGrid" class="numberGrid"></div>
+        <div class="bestBox">自己ベスト：<span id="numberBest">--</span></div>
+        <div id="numberHelp" class="numberHelp"></div>
+      </div>
     </div>
     <div id="rulesAns" class="hidden quizBox">
       <div id="quizLevelSelect">
@@ -202,6 +226,7 @@ th{color:#bcd0ef}.bar{height:8px;background:#08172e;border-radius:8px;overflow:h
         <div id="quizQuestion" class="quizQuestion"></div>
         <div id="quizChoices" class="quizChoices"></div>
         <div id="quizExplain" class="quizExplain hidden"></div>
+        <button id="quizNextBtn" class="quizNext hidden">次の問題へ →</button>
       </div>
     </div>
 
@@ -242,15 +267,15 @@ function answerLabel(mode,val){
   if(mode==='reaction') return 'タップ';
   return String(val);
 }
-const S={mode:'course',speed:120,batter:'left',running:false,round:0,answer:null,startTs:0,streak:0,bestStreak:0,ready:false,timer:null,records:[],numberNext:1,numberStart:0,numberTimer:null,totalPoints:0,quizQuestions:[],quizIndex:0,quizCorrect:0,quizLocked:false,quizLevel:null};
+const S={mode:'course',speed:120,batter:'left',running:false,round:0,answer:null,startTs:0,streak:0,bestStreak:0,ready:false,timer:null,records:[],numberNext:1,numberStart:0,numberTimer:null,numberLevel:null,numberMax:9,numberFlashTimer:null,totalPoints:0,quizQuestions:[],quizIndex:0,quizCorrect:0,quizLocked:false,quizLevel:null};
 
 function key(){let d=new Date();return 'bvt_'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function pointsKey(){return 'bvt_total_points'}
-function numberBestKey(){return 'bvt_number_best'}
+function numberBestKey(level){return 'bvt_number_best_'+(level||S.numberLevel||'beginner')}
 function loadPoints(){S.totalPoints=Number(localStorage.getItem(pointsKey())||0);$('#totalPoints').textContent=S.totalPoints;renderRank()}
 function addPoints(n){S.totalPoints+=n;localStorage.setItem(pointsKey(),String(S.totalPoints));$('#totalPoints').textContent=S.totalPoints;renderRank()}
-function getNumberBest(){const v=Number(localStorage.getItem(numberBestKey())||0);return v>0?v:null}
-function setNumberBest(ms){localStorage.setItem(numberBestKey(),String(ms))}
+function getNumberBest(level){const v=Number(localStorage.getItem(numberBestKey(level))||0);return v>0?v:null}
+function setNumberBest(ms,level){localStorage.setItem(numberBestKey(level),String(ms))}
 function getRankInfo(points){
   const ranks=[
     {name:'Bronze',icon:'🥉',min:0,next:500},
@@ -339,7 +364,7 @@ function updateProgress(){$('#setCount').textContent=S.round;$('#progress').styl
 function next(){
   if(!S.running)return;
   if(S.mode==='numbers'){
-    $('#msg').classList.add('hidden');resetBall();runNumbers();return;
+    $('#msg').classList.add('hidden');resetBall();showNumberLevelSelect();return;
   }
   if(S.mode==='rules'){
     $('#msg').classList.add('hidden');resetBall();showRuleLevelSelect();return;
@@ -515,6 +540,7 @@ function renderRuleQuestion(){
   $('#quizChoices').innerHTML=q.choices.map((c,i)=>`<button data-quiz="${i}">${c}</button>`).join('');
   $('#quizExplain').classList.add('hidden');
   $('#quizExplain').textContent='';
+  $('#quizNextBtn').classList.add('hidden');
   S.quizLocked=false;
 }
 function answerRule(idx){
@@ -527,7 +553,12 @@ function answerRule(idx){
   $('#quizExplain').classList.remove('hidden');
   $('#quizExplain').textContent=(ok?'○ 正解！ +20pt':'× 不正解')+'\n'+q.exp;
   $('#quizExplain').style.whiteSpace='pre-line';
-  setTimeout(()=>{S.quizIndex++;renderRuleQuestion()},1450);
+  $('#quizNextBtn').classList.remove('hidden');
+}
+function nextRuleQuestion(){
+  if(!S.running||S.mode!=='rules')return;
+  S.quizIndex++;
+  renderRuleQuestion();
 }
 function finishRules(){
   S.running=false;
@@ -547,25 +578,49 @@ function finishRules(){
   save();
 }
 
-function shuffleNumbers(){
-  const arr=[1,2,3,4,5,6,7,8,9];
+
+const NUMBER_LEVEL_NAMES={beginner:'🌱 初級 3×3',intermediate:'⚾ 中級 4×4',advanced:'🔥 上級 5×5'};
+function shuffleNumbers(max){
+  const arr=Array.from({length:max},(_,i)=>i+1);
   for(let i=arr.length-1;i>0;i--){
     const j=Math.floor(Math.random()*(i+1));
     [arr[i],arr[j]]=[arr[j],arr[i]];
   }
   return arr;
 }
-function runNumbers(){
+function showNumberLevelSelect(){
   show('numbersAns');
+  $('#numberLevelSelect').classList.remove('hidden');
+  $('#numberPlay').classList.add('hidden');
+}
+function chooseNumberLevel(level){
+  S.numberLevel=level;
+  S.numberMax=level==='beginner'?9:level==='intermediate'?16:25;
+  $('#numberLevelSelect').classList.add('hidden');
+  $('#numberPlay').classList.remove('hidden');
+  runNumbers();
+}
+function runNumbers(){
   S.numberNext=1;
   S.numberStart=performance.now();
   $('#nextNumber').textContent='1';
   $('#numberTime').textContent='0.00';
-  const best=getNumberBest();
-  $('#numberBest').textContent=best?(best/1000).toFixed(2)+' 秒':'--';
+  $('#numberLevelName').textContent=NUMBER_LEVEL_NAMES[S.numberLevel];
+  const best=getNumberBest(S.numberLevel);
+  $('#numberBest').textContent=best?(best/1000).toFixed(2)+' 秒':'記録なし';
 
-  const nums=shuffleNumbers();
+  const nums=shuffleNumbers(S.numberMax);
+  const gridClass=S.numberLevel==='beginner'?'grid3':S.numberLevel==='intermediate'?'grid4':'grid5';
+  $('#numberGrid').className='numberGrid '+gridClass;
   $('#numberGrid').innerHTML=nums.map(n=>`<button data-number="${n}">${n}</button>`).join('');
+
+  if(S.numberLevel==='advanced'){
+    $('#numberHelp').textContent='数字は1秒だけ表示されます。消えた位置を覚えて、正しいマスをタップ！';
+    $$('#numberGrid button').forEach(b=>b.classList.add('hiddenNumber'));
+    setTimeout(()=>flashAdvancedNumber(),350);
+  }else{
+    $('#numberHelp').textContent=S.numberLevel==='beginner'?'1→9をできるだけ速くタップ！':'1→16をできるだけ速くタップ！';
+  }
 
   clearInterval(S.numberTimer);
   S.numberTimer=setInterval(()=>{
@@ -573,29 +628,52 @@ function runNumbers(){
     $('#numberTime').textContent=((performance.now()-S.numberStart)/1000).toFixed(2);
   },50);
 }
+function flashAdvancedNumber(){
+  if(!S.running||S.mode!=='numbers'||S.numberLevel!=='advanced')return;
+  clearTimeout(S.numberFlashTimer);
+  const btn=$(`#numberGrid button[data-number="${S.numberNext}"]`);
+  if(!btn)return;
+  btn.classList.remove('hiddenNumber');
+  btn.classList.add('flashNumber');
+  S.numberFlashTimer=setTimeout(()=>{
+    btn.classList.add('hiddenNumber');
+    btn.classList.remove('flashNumber');
+  },1000);
+}
 function numberTap(btn){
-  if(!S.running||S.mode!=='numbers')return;
+  if(!S.running||S.mode!=='numbers'||!S.numberLevel)return;
   const n=Number(btn.dataset.number);
 
   if(n!==S.numberNext){
     btn.classList.add('wrong');
     setTimeout(()=>btn.classList.remove('wrong'),220);
+    if(S.numberLevel==='advanced')setTimeout(()=>flashAdvancedNumber(),450);
     return;
   }
 
   btn.classList.add('done');
+  btn.classList.remove('hiddenNumber','flashNumber');
 
-  if(n===9){
+  if(n===S.numberMax){
     clearInterval(S.numberTimer);
+    clearTimeout(S.numberFlashTimer);
     const elapsed=performance.now()-S.numberStart;
-    const oldBest=getNumberBest();
-    const isBest=!oldBest||elapsed<oldBest;
-    let pts=50;
-    if(isBest){pts+=100;setNumberBest(elapsed)}
+    const oldBest=getNumberBest(S.numberLevel);
+    const isFirst=!oldBest;
+    const isBest=!!oldBest && elapsed<oldBest;
+    let pts=S.numberLevel==='beginner'?50:S.numberLevel==='intermediate'?80:120;
+
+    if(isFirst){
+      setNumberBest(elapsed,S.numberLevel);
+    }else if(isBest){
+      pts+=100;
+      setNumberBest(elapsed,S.numberLevel);
+    }
     addPoints(pts);
 
     $('#numberTime').textContent=(elapsed/1000).toFixed(2);
-    $('#numberBest').textContent=((isBest?elapsed:oldBest)/1000).toFixed(2)+' 秒';
+    const savedBest=isFirst||isBest?elapsed:oldBest;
+    $('#numberBest').textContent=(savedBest/1000).toFixed(2)+' 秒';
 
     S.records.push({
       time:new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}),
@@ -605,13 +683,15 @@ function numberTap(btn){
     S.running=false;
     $('#msg').classList.remove('hidden');
     $('#msg').classList.add('celebrate');
-    $('#msg').textContent=(isBest?'🔥 最速タイム更新！\\n':'🎯 完了！\\n')+(elapsed/1000).toFixed(2)+' 秒\\n+'+pts+' pt';
+    let head=isFirst?'🎯 初記録！':isBest?'🔥 自己ベスト更新！':'🎯 完了！';
+    $('#msg').textContent=head+'\n'+(elapsed/1000).toFixed(2)+' 秒\n+'+pts+' pt';
     $('#msg').style.whiteSpace='pre-line';
     return;
   }
 
   S.numberNext++;
   $('#nextNumber').textContent=S.numberNext;
+  if(S.numberLevel==='advanced')setTimeout(()=>flashAdvancedNumber(),500);
 }
 
 function answer(v){
@@ -634,7 +714,7 @@ $$('.mode').forEach(b=>b.addEventListener('click',()=>{
   $('#msg').classList.remove('celebrate');
   if(S.mode==='numbers'){
     $('#setCount').textContent='-';$('#progress').style.width='0%';
-    $('#msg').classList.remove('hidden');$('#msg').textContent='開始を押して\n1→9の順にタップ';$('#msg').style.whiteSpace='pre-line';
+    $('#msg').classList.remove('hidden');$('#msg').textContent='開始を押して\n数字タップの難易度を選択';$('#msg').style.whiteSpace='pre-line';
   }else if(S.mode==='rules'){
     $('#setCount').textContent='-';$('#progress').style.width='0%';
     $('#msg').classList.remove('hidden');$('#msg').textContent='開始を押して\n○×・3択の野球ルールクイズ';$('#msg').style.whiteSpace='pre-line';
@@ -647,13 +727,16 @@ $('#speed').addEventListener('input',e=>{S.speed=+e.target.value;$('#speedText')
 $('#leftBat').addEventListener('click',()=>{S.batter='left';$('#leftBat').classList.add('active');$('#rightBat').classList.remove('active')});
 $('#rightBat').addEventListener('click',()=>{S.batter='right';$('#rightBat').classList.add('active');$('#leftBat').classList.remove('active')});
 $('#startBtn').addEventListener('click',()=>{S.running=true;S.round=0;S.streak=0;$('#msg').classList.remove('celebrate');if(S.mode!=='numbers'&&S.mode!=='rules')updateProgress();next()});
-$('#stopBtn').addEventListener('click',()=>{S.running=false;clearTimeout(S.timer);clearInterval(S.numberTimer);S.quizLocked=true;show(null);resetBall();$('#msg').classList.remove('hidden');$('#msg').textContent='停止しました'});
+$('#stopBtn').addEventListener('click',()=>{S.running=false;clearTimeout(S.timer);clearInterval(S.numberTimer);clearTimeout(S.numberFlashTimer);S.quizLocked=true;show(null);resetBall();$('#msg').classList.remove('hidden');$('#msg').textContent='停止しました'});
 document.body.addEventListener('click',e=>{let b=e.target.closest('[data-answer]');if(b)answer(b.dataset.answer)});
 document.body.addEventListener('click',e=>{let b=e.target.closest('[data-number]');if(b)numberTap(b)});
+document.body.addEventListener('click',e=>{let b=e.target.closest('[data-number-level]');if(b)chooseNumberLevel(b.dataset.numberLevel)});
 document.body.addEventListener('click',e=>{let b=e.target.closest('[data-quiz]');if(b)answerRule(b.dataset.quiz)});
 document.body.addEventListener('click',e=>{let b=e.target.closest('[data-quiz-level]');if(b)chooseRuleLevel(b.dataset.quizLevel)});
 $('#reactionBtn').addEventListener('click',()=>answer('tap'));
 $('#clearBtn').addEventListener('click',()=>{if(confirm('今日の記録を削除しますか？')){S.records=[];S.streak=0;S.bestStreak=0;localStorage.removeItem(key());renderStats()}});
+
+$('#quizNextBtn').addEventListener('click',nextRuleQuestion);
 load();
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
