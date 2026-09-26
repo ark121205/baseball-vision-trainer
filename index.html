@@ -55,7 +55,7 @@ th{color:#bcd0ef}.bar{height:8px;background:#08172e;border-radius:8px;overflow:h
 <body>
 <div class="app">
   <h1>⚾ 野球ビジョントレーナー</h1>
-  <div class="sub">動体視力・瞬間視・選球眼・反応速度</div>
+  <div class="sub">動体視力・瞬間視・選球眼・反応速度　<span style="opacity:.65">v0.3</span></div>
 
   <section class="card statgrid">
     <div class="stat"><b id="todayCount">0</b><span>今日</span></div>
@@ -151,6 +151,15 @@ th{color:#bcd0ef}.bar{height:8px;background:#08172e;border-radius:8px;overflow:h
 (()=>{
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const names={course:'コース判定',pitch:'球種判定',flash:'瞬間視',select:'選球眼',reaction:'反応速度'};
+const courseLabels={'1':'左上','2':'上','3':'右上','4':'左','5':'中央','6':'右','7':'左下','8':'下','9':'右下'};
+const pitchLabels={straight:'ストレート',slider:'スライダー',curve:'カーブ',fork:'フォーク',change:'チェンジ'};
+function answerLabel(mode,val){
+  if(mode==='course') return courseLabels[String(val)]||String(val);
+  if(mode==='pitch') return pitchLabels[val]||String(val);
+  if(mode==='select') return val==='swing'?'打つ':'見逃す';
+  if(mode==='reaction') return 'タップ';
+  return String(val);
+}
 const S={mode:'course',speed:120,batter:'left',running:false,round:0,answer:null,startTs:0,streak:0,bestStreak:0,ready:false,timer:null,records:[]};
 
 function key(){let d=new Date();return 'bvt_'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
@@ -192,8 +201,17 @@ function coursePos(i){
 }
 function animate(x,y,letter=''){let b=$('#ball');b.classList.remove('hidden');b.textContent=letter;b.style.transition='none';b.style.transform='translate(0,0) scale(.5)';
 requestAnimationFrame(()=>requestAnimationFrame(()=>{b.style.transition=`transform ${duration()}ms cubic-bezier(.18,.72,.22,1)`;b.style.transform=`translate(${x}px,${y}px) scale(1.08)`}))}
-function feedback(ok,rt){S.streak=ok?S.streak+1:0;S.bestStreak=Math.max(S.bestStreak,S.streak);S.records.push({time:new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}),mode:S.mode,correct:ok,rt,streak:S.streak});save();
-$('#msg').classList.remove('hidden');$('#msg').textContent=ok?'○ 正解':'× 不正解';show(null);setTimeout(next,600)}
+function feedback(ok,rt,correctValue){
+  S.streak=ok?S.streak+1:0;
+  S.bestStreak=Math.max(S.bestStreak,S.streak);
+  S.records.push({time:new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}),mode:S.mode,correct:ok,rt,streak:S.streak});
+  save();
+  $('#msg').classList.remove('hidden');
+  $('#msg').textContent=ok?'○ 正解':'× 不正解\n正解：'+answerLabel(S.mode,correctValue);
+  $('#msg').style.whiteSpace='pre-line';
+  show(null);
+  setTimeout(next,900);
+}
 function updateProgress(){$('#setCount').textContent=S.round;$('#progress').style.width=Math.min(100,S.round/30*100)+'%'}
 function next(){
   if(!S.running)return;
@@ -252,8 +270,14 @@ function reaction(){
 }
 function answer(v){
  if(!S.running||S.answer===null)return;
- if(S.mode==='reaction'&&!S.ready){S.records.push({time:new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}),mode:S.mode,correct:false,rt:null,streak:0});S.streak=0;save();$('#msg').classList.remove('hidden');$('#msg').textContent='早すぎ！';show(null);setTimeout(next,650);return}
- let rt=Math.max(0,performance.now()-S.startTs),ok=String(v)===String(S.answer);S.answer=null;feedback(ok,rt)
+ if(S.mode==='reaction'&&!S.ready){
+   S.records.push({time:new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}),mode:S.mode,correct:false,rt:null,streak:0});
+   S.streak=0;save();$('#msg').classList.remove('hidden');$('#msg').textContent='早すぎ！';show(null);setTimeout(next,650);return
+ }
+ const correctValue=S.answer;
+ let rt=Math.max(0,performance.now()-S.startTs),ok=String(v)===String(correctValue);
+ S.answer=null;
+ feedback(ok,rt,correctValue)
 }
 $$('.mode').forEach(b=>b.addEventListener('click',()=>{if(S.running)return;$$('.mode').forEach(x=>x.classList.remove('active'));b.classList.add('active');S.mode=b.dataset.mode;$('#modeName').textContent=names[S.mode]}));
 $('#speed').addEventListener('input',e=>{S.speed=+e.target.value;$('#speedText').textContent=S.speed});
@@ -265,7 +289,16 @@ document.body.addEventListener('click',e=>{let b=e.target.closest('[data-answer]
 $('#reactionBtn').addEventListener('click',()=>answer('tap'));
 $('#clearBtn').addEventListener('click',()=>{if(confirm('今日の記録を削除しますか？')){S.records=[];S.streak=0;S.bestStreak=0;localStorage.removeItem(key());renderStats()}});
 load();
-if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}))}
+if('serviceWorker' in navigator){
+  window.addEventListener('load',async()=>{
+    try{
+      const regs=await navigator.serviceWorker.getRegistrations();
+      for(const reg of regs){await reg.unregister();}
+      const keys=await caches.keys();
+      for(const k of keys){if(k.startsWith('baseball-vision-')) await caches.delete(k);}
+    }catch(e){}
+  });
+}
 })();
 </script>
 </body>
