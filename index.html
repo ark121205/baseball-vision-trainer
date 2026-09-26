@@ -151,6 +151,28 @@ padding:12px 16px;border-radius:13px;font-weight:800;text-align:center;backdrop-
 .scoreExplain{margin-top:10px;padding:12px;border-radius:12px;background:#102446;line-height:1.55}
 .scoreLegend{font-size:11px;color:#9db1d5;line-height:1.45;margin-top:8px}
 
+
+.studyCard{padding:18px}
+.studyStep{font-size:12px;color:#9db1d5;margin-bottom:6px}
+.studyTitle{font-size:22px;font-weight:900;margin-bottom:10px}
+.studyLead{font-size:15px;line-height:1.7;color:#e9f1ff}
+.studyVisual{
+  margin:14px 0;padding:18px;border-radius:16px;background:#f5f5f2;color:#111;
+  text-align:center;min-height:110px;display:flex;align-items:center;justify-content:center
+}
+.studyBig{font-size:42px;font-weight:900}
+.studyExample{margin-top:12px;padding:12px;border-radius:12px;background:#0b1a36;line-height:1.65}
+.studyTip{margin-top:10px;padding:10px;border-left:4px solid #64baff;background:#102446;border-radius:8px;line-height:1.55}
+.studyNav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.studyNav button{min-height:48px}
+.studyCheck{margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.12)}
+.studyCheckQ{font-weight:800;margin-bottom:8px}
+.studyCheckChoices{display:grid;gap:8px}
+.studyFeedback{margin-top:10px;padding:10px;border-radius:10px;background:#102446;line-height:1.5}
+.lessonList{display:grid;gap:8px;margin-top:12px}
+.lessonList button{text-align:left;padding:13px}
+.lessonDone{opacity:.6}
+
 </style>
 </head>
 <body>
@@ -160,7 +182,7 @@ padding:12px 16px;border-radius:13px;font-weight:800;text-align:center;backdrop-
   <section id="screenTop" class="screen active">
     <div class="topHeader">
       <h1>⚾ 野球ビジョントレーナー</h1>
-      <div class="sub">視覚・反応・判断・ルール　<span class="version">v1.5</span></div>
+      <div class="sub">視覚・反応・判断・ルール　<span class="version">v1.6</span></div>
     </div>
 
     <section class="card">
@@ -190,6 +212,7 @@ padding:12px 16px;border-radius:13px;font-weight:800;text-align:center;backdrop-
         <button class="menuCard" data-menu="reaction"><span class="icon">⚡</span><strong>反応速度</strong><span>光った瞬間にタップ</span></button>
         <button class="menuCard" data-menu="numbers"><span class="icon">🔢</span><strong>数字タップ</strong><span>視野・探索・記憶を鍛える</span></button>
         <button class="menuCard" data-menu="rules" style="grid-column:1 / -1"><span class="icon">📘</span><strong>野球ルールクイズ</strong><span>初級〜ボーイズ実戦まで</span></button>
+        <button class="menuCard" data-menu="scoreStudy" style="grid-column:1 / -1"><span class="icon">📖</span><strong>スコアを勉強する</strong><span>初めてでも分かる・1テーマずつ学習</span></button>
         <button class="menuCard" data-menu="score" style="grid-column:1 / -1"><span class="icon">📝</span><strong>スコア記号クイズ</strong><span>早稲田式の記号を見て読めるようにする</span></button>
       </div>
     </section>
@@ -223,6 +246,41 @@ padding:12px 16px;border-radius:13px;font-weight:800;text-align:center;backdrop-
       </div>
 
       <button id="settingsStartBtn" class="primary startBig">この設定で開始！</button>
+    </section>
+  </section>
+
+
+  <!-- SCORE STUDY -->
+  <section id="screenScoreStudy" class="screen">
+    <div class="backRow">
+      <button id="studyHomeBtn" class="ghost">← トップへ</button>
+    </div>
+
+    <section id="studyListCard" class="card">
+      <h2>📖 スコアを勉強する</h2>
+      <div class="sub" style="margin-top:5px">1テーマずつ順番に進めます。途中からでもOK。</div>
+      <div id="lessonList" class="lessonList"></div>
+    </section>
+
+    <section id="studyLessonCard" class="card studyCard hidden">
+      <div id="studyStep" class="studyStep"></div>
+      <div id="studyTitle" class="studyTitle"></div>
+      <div id="studyLead" class="studyLead"></div>
+      <div id="studyVisual" class="studyVisual"></div>
+      <div id="studyExample" class="studyExample"></div>
+      <div id="studyTip" class="studyTip"></div>
+
+      <div class="studyCheck">
+        <div class="studyCheckQ" id="studyCheckQ"></div>
+        <div class="studyCheckChoices" id="studyCheckChoices"></div>
+        <div id="studyFeedback" class="studyFeedback hidden"></div>
+      </div>
+
+      <div class="studyNav">
+        <button id="prevLessonBtn" class="ghost">← 前へ</button>
+        <button id="nextLessonBtn" class="primary">次へ →</button>
+      </div>
+      <button id="lessonListBtn" class="ghost" style="width:100%;margin-top:8px">一覧に戻る</button>
     </section>
   </section>
 
@@ -992,7 +1050,170 @@ function finishGeneric(title,text){
   showScreen('screenResult');
 }
 
-$$('[data-menu]').forEach(b=>b.addEventListener('click',()=>openSettings(b.dataset.menu)));
+
+/* SCORE STUDY */
+const SCORE_LESSONS=[
+ {
+  title:'① まず「1マス」の見方',
+  lead:'スコアブックは、打者1人の打席を1つのマスにまとめて書きます。真ん中のひし形はダイヤモンドです。',
+  visual:'<div style="font-size:52px">◇</div>',
+  example:'右下＝一塁、右上＝二塁、左上＝三塁、左下＝本塁、と考えると位置関係が分かりやすくなります。',
+  tip:'最初は記号を全部覚えなくてOK。まず「この1マスに1打席分が入る」と覚えよう。',
+  q:'1つのマスには、基本的に何が記録される？',
+  choices:['1人の1打席','1イニング全部','投手1人の成績'],
+  answer:0,
+  feedback:'正解。1マスが1打席分の情報です。'
+ },
+ {
+  title:'② 守備番号 1〜9',
+  lead:'野球の守備位置は、スコアでは名前ではなく数字で書きます。',
+  visual:'<div class="studyBig">1 2 3 4 5 6 7 8 9</div>',
+  example:'1=投手、2=捕手、3=一塁手、4=二塁手、5=三塁手、6=遊撃手、7=左翼手、8=中堅手、9=右翼手。',
+  tip:'内野は「1〜6」、外野は「7・8・9」と分けて覚えると楽。',
+  q:'「6」はどの守備位置？',
+  choices:['二塁手','遊撃手','中堅手'],
+  answer:1,
+  feedback:'正解。6は遊撃手です。'
+ },
+ {
+  title:'③ アウトの Ⅰ・Ⅱ・Ⅲ',
+  lead:'打者や走者がアウトになったとき、その回の何個目のアウトかをローマ数字で書きます。',
+  visual:'<div class="studyBig">Ⅰ　Ⅱ　Ⅲ</div>',
+  example:'Ⅰ=1アウト目、Ⅱ=2アウト目、Ⅲ=3アウト目。',
+  tip:'3アウトで攻守交代なので、Ⅲが出たらその回の攻撃終了。',
+  q:'「Ⅱ」は何アウト目？',
+  choices:['1アウト目','2アウト目','3アウト目'],
+  answer:1,
+  feedback:'正解。Ⅱは2アウト目です。'
+ },
+ {
+  title:'④ 得点の記号',
+  lead:'走者がホームまで帰って得点したことも、マスの中に記録します。',
+  visual:'<div style="font-size:42px">●　○</div>',
+  example:'塗りつぶした丸や白抜きの丸を使って、得点と自責点の有無を区別して記録する方式があります。',
+  tip:'まずは「丸があれば得点」と覚え、細かい自責点の違いはあとからでOK。',
+  q:'マスに丸印があるとき、まず何を疑う？',
+  choices:['得点','盗塁','三振'],
+  answer:0,
+  feedback:'正解。まず得点の記録と考えます。'
+ },
+ {
+  title:'⑤ 残塁 ℓ',
+  lead:'攻撃が終わったとき、走者が塁に残っていたことを「残塁」といいます。',
+  visual:'<div class="studyBig">ℓ</div>',
+  example:'ℓ が書かれていたら、その走者は得点せず塁上に残ったまま攻撃終了。',
+  tip:'「L = Left on base（塁に残った）」のイメージで覚えると分かりやすい。',
+  q:'「ℓ」の意味は？',
+  choices:['残塁','盗塁','暴投'],
+  answer:0,
+  feedback:'正解。ℓは残塁です。'
+ },
+ {
+  title:'⑥ 盗塁 S と盗塁死 CS',
+  lead:'盗塁に成功したか、失敗してアウトになったかも記号で区別します。',
+  visual:'<div class="studyBig">S　 /　 CS</div>',
+  example:'S = 盗塁成功、CS = 盗塁死（Caught Stealing）。',
+  tip:'CSは「捕まった盗塁」と覚えると忘れにくい。',
+  q:'「CS」の意味は？',
+  choices:['盗塁成功','盗塁死','捕逸'],
+  answer:1,
+  feedback:'正解。CSは盗塁死です。'
+ },
+ {
+  title:'⑦ 暴投 W・捕逸 P・ボーク BK',
+  lead:'走者が打球以外の理由で進塁したとき、その原因も記録します。',
+  visual:'<div class="studyBig">W　P　BK</div>',
+  example:'W=暴投、P=捕逸、BK=ボーク。',
+  tip:'W=Wild Pitch、P=Passed Ball、BK=Balk と英語の頭文字で覚える。',
+  q:'「W」は何を表す？',
+  choices:['暴投','捕逸','ボーク'],
+  answer:0,
+  feedback:'正解。Wは暴投です。'
+ },
+ {
+  title:'⑧ ゴロアウトの「1-3」「6-3」',
+  lead:'ゴロでアウトになったときは、誰が処理して誰に送球したかを守備番号で書きます。',
+  visual:'<div class="studyBig">1-3　6-3</div>',
+  example:'1-3 = 投手→一塁手、6-3 = 遊撃手→一塁手。',
+  tip:'「左の数字が捕った人、右の数字が受けた人」と見ると読みやすい。',
+  q:'「6-3」はどんなプレー？',
+  choices:['遊撃手→一塁手','二塁手→一塁手','投手→一塁手'],
+  answer:0,
+  feedback:'正解。6は遊撃手、3は一塁手です。'
+ },
+ {
+  title:'⑨ ヒットと打球方向',
+  lead:'ヒットは、どの守備位置の方向へ飛んだかも一緒に記録します。',
+  visual:'<div class="studyBig">7　8　9</div>',
+  example:'7=左翼方向、8=中堅方向、9=右翼方向。長打なら二塁打・三塁打・本塁打の情報も加えます。',
+  tip:'外野は左から7・8・9。数字の並びでそのまま覚えると簡単。',
+  q:'「8」はどの方向？',
+  choices:['左翼','中堅','右翼'],
+  answer:1,
+  feedback:'正解。8は中堅です。'
+ },
+ {
+  title:'⑩ 1マスをまとめて読む',
+  lead:'最後は、1つのマスに書かれた複数の情報を組み合わせて読みます。',
+  visual:'<div class="studyBig">Ⅰ / 6-3</div>',
+  example:'「Ⅰ / 6-3」なら、1アウト目で、遊撃手が捕って一塁手へ送球し、打者がアウトになったと読めます。',
+  tip:'①アウト数 → ②守備番号 → ③進塁・得点記号、の順で読むと混乱しにくい。',
+  q:'「Ⅰ / 6-3」の意味として最も近いのは？',
+  choices:['1アウト目・遊ゴロで一塁アウト','2アウト目・二ゴロ','盗塁成功'],
+  answer:0,
+  feedback:'正解。Ⅰは1アウト目、6-3は遊撃手→一塁手です。'
+ }
+];
+
+let studyIndex=0;
+function openStudy(){
+  stopAll();
+  renderLessonList();
+  $('#studyListCard').classList.remove('hidden');
+  $('#studyLessonCard').classList.add('hidden');
+  showScreen('screenScoreStudy');
+}
+function renderLessonList(){
+  $('#lessonList').innerHTML=SCORE_LESSONS.map((l,i)=>`<button data-lesson="${i}">${l.title}</button>`).join('');
+}
+function openLesson(i){
+  studyIndex=Number(i);
+  const l=SCORE_LESSONS[studyIndex];
+  $('#studyListCard').classList.add('hidden');
+  $('#studyLessonCard').classList.remove('hidden');
+  $('#studyStep').textContent=`${studyIndex+1} / ${SCORE_LESSONS.length}`;
+  $('#studyTitle').textContent=l.title;
+  $('#studyLead').textContent=l.lead;
+  $('#studyVisual').innerHTML=l.visual;
+  $('#studyExample').textContent='例：'+l.example;
+  $('#studyTip').textContent='💡 '+l.tip;
+  $('#studyCheckQ').textContent='確認：'+l.q;
+  $('#studyCheckChoices').innerHTML=l.choices.map((c,idx)=>`<button data-study-answer="${idx}">${c}</button>`).join('');
+  $('#studyFeedback').classList.add('hidden');
+  $('#studyFeedback').textContent='';
+  $('#prevLessonBtn').disabled=studyIndex===0;
+  $('#nextLessonBtn').textContent=studyIndex===SCORE_LESSONS.length-1?'学習完了！':'次へ →';
+}
+function answerStudy(idx){
+  const l=SCORE_LESSONS[studyIndex];
+  const ok=Number(idx)===l.answer;
+  $('#studyFeedback').classList.remove('hidden');
+  $('#studyFeedback').textContent=ok?'○ '+l.feedback:'× もう一度考えてみよう。\n'+l.feedback;
+  $('#studyFeedback').style.whiteSpace='pre-line';
+}
+function showLessonList(){
+  $('#studyLessonCard').classList.add('hidden');
+  $('#studyListCard').classList.remove('hidden');
+}
+
+$$('[data-menu]').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.menu==='scoreStudy')openStudy();else openSettings(b.dataset.menu)}));
+$('#studyHomeBtn').addEventListener('click',goTop);
+$('#lessonListBtn').addEventListener('click',showLessonList);
+$('#prevLessonBtn').addEventListener('click',()=>{if(studyIndex>0)openLesson(studyIndex-1)});
+$('#nextLessonBtn').addEventListener('click',()=>{
+  if(studyIndex<SCORE_LESSONS.length-1)openLesson(studyIndex+1);
+  else showLessonList();
+});
 $('#settingsHomeBtn').addEventListener('click',goTop);
 $('#trainingHomeBtn').addEventListener('click',goTop);
 $('#resultHomeBtn').addEventListener('click',goTop);
@@ -1020,6 +1241,10 @@ document.body.addEventListener('click',e=>{
   if(q)answerRule(q.dataset.quiz);
   const s=e.target.closest('[data-score]');
   if(s)answerScore(s.dataset.score);
+  const l=e.target.closest('[data-lesson]');
+  if(l)openLesson(l.dataset.lesson);
+  const sa=e.target.closest('[data-study-answer]');
+  if(sa)answerStudy(sa.dataset.studyAnswer);
 });
 $('#quizNextBtn').addEventListener('click',nextRuleQuestion);
 $('#scoreNextBtn').addEventListener('click',nextScoreQuestion);
