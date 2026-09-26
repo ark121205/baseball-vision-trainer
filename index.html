@@ -76,12 +76,18 @@ th{color:#bcd0ef}.bar{height:8px;background:#08172e;border-radius:8px;overflow:h
 .quizChoices button{min-height:54px;font-size:17px;font-weight:800}
 .quizExplain{margin-top:10px;padding:12px;border-radius:12px;background:#102446;line-height:1.5}
 
+
+.quizLevels{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
+.quizLevels button{min-height:50px;font-weight:900}
+.quizLevels .selected{outline:3px solid #f4d35e}
+.quizSource{margin-top:10px;font-size:11px;line-height:1.45;color:#91a8cf}
+
 </style>
 </head>
 <body>
 <div class="app">
   <h1>⚾ 野球ビジョントレーナー</h1>
-  <div class="sub">動体視力・瞬間視・選球眼・反応速度　<span style="opacity:.65">v0.8</span></div>
+  <div class="sub">動体視力・瞬間視・選球眼・反応速度　<span style="opacity:.65">v0.9</span></div>
 
 <section class="card">
   <div class="row">
@@ -177,13 +183,26 @@ th{color:#bcd0ef}.bar{height:8px;background:#08172e;border-radius:8px;overflow:h
       <div class="bestBox">自己ベスト：<span id="numberBest">--</span></div>
     </div>
     <div id="rulesAns" class="hidden quizBox">
-      <div class="quizMeta">
-        <span>問題 <strong id="quizNo">1</strong>/10</span>
-        <span>正解 <strong id="quizCorrect">0</strong></span>
+      <div id="quizLevelSelect">
+        <div class="quizQuestion">難易度を選んでください</div>
+        <div class="quizLevels">
+          <button data-quiz-level="beginner">🌱 初級</button>
+          <button data-quiz-level="intermediate">⚾ 中級</button>
+          <button data-quiz-level="advanced">🔥 上級</button>
+          <button data-quiz-level="boys">🏆 ボーイズ実戦</button>
+        </div>
+        <div class="quizSource">ボーイズ実戦編は、日本少年野球連盟の2026年度資料・大会規定をもとに作成。</div>
       </div>
-      <div id="quizQuestion" class="quizQuestion"></div>
-      <div id="quizChoices" class="quizChoices"></div>
-      <div id="quizExplain" class="quizExplain hidden"></div>
+
+      <div id="quizPlay" class="hidden">
+        <div class="quizMeta">
+          <span><strong id="quizLevelName"></strong>　問題 <strong id="quizNo">1</strong>/10</span>
+          <span>正解 <strong id="quizCorrect">0</strong></span>
+        </div>
+        <div id="quizQuestion" class="quizQuestion"></div>
+        <div id="quizChoices" class="quizChoices"></div>
+        <div id="quizExplain" class="quizExplain hidden"></div>
+      </div>
     </div>
 
     <div class="answers two">
@@ -223,7 +242,7 @@ function answerLabel(mode,val){
   if(mode==='reaction') return 'タップ';
   return String(val);
 }
-const S={mode:'course',speed:120,batter:'left',running:false,round:0,answer:null,startTs:0,streak:0,bestStreak:0,ready:false,timer:null,records:[],numberNext:1,numberStart:0,numberTimer:null,totalPoints:0,quizQuestions:[],quizIndex:0,quizCorrect:0,quizLocked:false};
+const S={mode:'course',speed:120,batter:'left',running:false,round:0,answer:null,startTs:0,streak:0,bestStreak:0,ready:false,timer:null,records:[],numberNext:1,numberStart:0,numberTimer:null,totalPoints:0,quizQuestions:[],quizIndex:0,quizCorrect:0,quizLocked:false,quizLevel:null};
 
 function key(){let d=new Date();return 'bvt_'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function pointsKey(){return 'bvt_total_points'}
@@ -323,7 +342,7 @@ function next(){
     $('#msg').classList.add('hidden');resetBall();runNumbers();return;
   }
   if(S.mode==='rules'){
-    $('#msg').classList.add('hidden');resetBall();startRules();return;
+    $('#msg').classList.add('hidden');resetBall();showRuleLevelSelect();return;
   }
   if(S.round>=30){S.running=false;show(null);resetBall();$('#msg').classList.remove('hidden');$('#msg').textContent='30球終了！';return}
   S.round++;updateProgress();$('#msg').classList.add('hidden');resetBall();clearTimeout(S.timer);
@@ -383,20 +402,80 @@ function reaction(){
 }
 
 
-const RULE_QUESTIONS=[
-  {type:'tf',q:'打者が2ストライク後にバントしてファウルになった場合、打者は三振になる。',choices:['○','×'],answer:0,exp:'2ストライク後のバントがファウルになると、打者は三振でアウトです。'},
-  {type:'tf',q:'外野フライを野手が捕球したら、走者はいつでもそのまま次の塁へ進める。',choices:['○','×'],answer:1,exp:'捕球された飛球では、走者は元の塁へリタッチしてから進塁できます。'},
-  {type:'mc',q:'四球（ボール4つ）になった打者はどうなる？',choices:['アウト','一塁へ進む','もう1球投げる'],answer:1,exp:'四球では打者に一塁が与えられます。'},
-  {type:'mc',q:'無死または一死で、走者一・二塁または満塁。内野手が普通に捕れそうなフェアの飛球（ライナー・バントを除く）は何と呼ばれる？',choices:['インフィールドフライ','ファウルフライ','ボーク'],answer:0,exp:'条件を満たすとインフィールドフライが宣告され、打者はアウトになります。'},
-  {type:'tf',q:'ファウルフライでも、野手が地面に落ちる前に捕球すれば打者はアウトになる。',choices:['○','×'],answer:0,exp:'フェア地域でもファウル地域でも、飛球を正規に捕球すれば打者はアウトです。'},
-  {type:'mc',q:'二死で一塁に走者がいるとき、振り逃げができる条件として正しいものは？',choices:['できない','捕手が第3ストライクを正規に捕球しなかったとき可能','必ず一塁へ走れる'],answer:1,exp:'二死なら一塁に走者がいても、捕手が第3ストライクを正規に捕球していなければ振り逃げの対象になります。'},
-  {type:'tf',q:'打者が打ったフェアボールが一塁または三塁を越える前にファウル地域へ転がった場合、原則ファウルになる。',choices:['○','×'],answer:0,exp:'一塁・三塁より手前では、ボールが止まった位置や通過位置などでフェア／ファウルが決まります。'},
-  {type:'mc',q:'打者走者が一塁へ走るとき、守備側が一塁でアウトにする一般的な方法は？',choices:['走者に必ずタッチする','一塁手がボールを持って走者より先に一塁に触れる','投手がマウンドに戻る'],answer:1,exp:'フォースのかかる一塁では、守備側がボールを持って走者より先に一塁へ触れればアウトです。'},
-  {type:'tf',q:'捕球されたフライで、走者がリタッチせずに進塁した場合、守備側が正しくアピールすればアウトになることがある。',choices:['○','×'],answer:0,exp:'捕球前に離塁し、リタッチしなかった走者はアピールプレイでアウトになることがあります。'},
-  {type:'mc',q:'ストライクゾーンを通った投球を打者が見逃した場合は？',choices:['ストライク','ボール','必ずファウル'],answer:0,exp:'打者が振らなくても、ストライクゾーンを通った正規の投球はストライクです。'},
-  {type:'tf',q:'打球がフェンスを越えれば、どこを越えても必ずホームランになる。',choices:['○','×'],answer:1,exp:'ホームランになるには、フェア地域のフェンスを越えるなど所定の条件を満たす必要があります。'},
-  {type:'mc',q:'一塁走者がいるとき、ゴロを遊撃手が捕って二塁へ送球。二塁手が走者より先に二塁を踏んだ。このアウトは？',choices:['フォースアウト','タッチアウト','三振'],answer:0,exp:'打者が一塁へ進むため一塁走者には二塁への進塁義務があり、二塁でのプレーはフォースアウトです。'}
-];
+
+const RULE_QUESTIONS={
+beginner:[
+ {type:'tf',q:'2ストライク後にバントしてファウルになった場合、打者は三振になる。',choices:['○','×'],answer:0,exp:'2ストライク後のバントファウルは三振で打者アウトです。'},
+ {type:'mc',q:'四球になった打者はどうなる？',choices:['アウト','一塁へ進む','もう1球投げる'],answer:1,exp:'ボール4つで打者には一塁が与えられます。'},
+ {type:'tf',q:'ファウルフライでも、地面に落ちる前に野手が正規に捕球すれば打者はアウトになる。',choices:['○','×'],answer:0,exp:'ファウル地域でも飛球を正規に捕球すれば打者アウトです。'},
+ {type:'mc',q:'ストライクゾーンを通った投球を打者が見逃した場合は？',choices:['ストライク','ボール','ファウル'],answer:0,exp:'振らなくてもストライクゾーンを通ればストライクです。'},
+ {type:'tf',q:'打者走者が一塁へ走るプレーでは、一塁手がボールを持って走者より先に一塁へ触れればアウトになる。',choices:['○','×'],answer:0,exp:'一塁への通常のフォースプレーではこれでアウトになります。'},
+ {type:'mc',q:'捕球された外野フライで走者が次の塁へ進むとき必要なのは？',choices:['元の塁へのリタッチ','必ず盗塁のサイン','投手の許可'],answer:0,exp:'飛球が捕球された場合、走者は元の塁へリタッチしてから進塁します。'},
+ {type:'tf',q:'打球がフェア地域のフェンスを越えれば、原則ホームランになる。',choices:['○','×'],answer:0,exp:'正規のフェア飛球が所定のフェンスを越えれば本塁打です。'},
+ {type:'mc',q:'一塁走者がいるとき、内野ゴロで二塁を先に踏んで走者をアウトにするのは？',choices:['フォースアウト','三振','ボーク'],answer:0,exp:'進塁義務のある走者に対するフォースアウトです。'},
+ {type:'tf',q:'3アウトになったら、そのチームの攻撃は終了する。',choices:['○','×'],answer:0,exp:'各イニングの攻撃は3アウトで交代します。'},
+ {type:'mc',q:'打者が打ったボールが一塁線の外側を通り、ファウルと判定された。この打球は？',choices:['フェア','ファウル','ストライクではない'],answer:1,exp:'ファウルと判定された打球はファウルボールです。'},
+ {type:'tf',q:'盗塁は、投手が投球する前後のタイミングで走者が次の塁を狙うプレーである。',choices:['○','×'],answer:0,exp:'走者が守備の隙をついて次塁を狙う代表的な走塁プレーです。'},
+ {type:'mc',q:'打者が三振したら通常どうなる？',choices:['打者アウト','一塁へ進む','必ずもう1球'],answer:0,exp:'通常は三振で打者アウトです。ただし振り逃げが成立し得る場合があります。'}
+],
+intermediate:[
+ {type:'mc',q:'無死または一死で、走者一・二塁または満塁。内野手が普通に捕れそうなフェア飛球（ライナー・バント除く）は？',choices:['インフィールドフライ','ボーク','振り逃げ'],answer:0,exp:'条件を満たせばインフィールドフライが宣告され、打者はアウトです。'},
+ {type:'tf',q:'二死なら、一塁に走者がいても捕手が第3ストライクを正規に捕球していない場合、振り逃げの対象になり得る。',choices:['○','×'],answer:0,exp:'二死の場合は一塁走者の有無に関わらず振り逃げの対象になり得ます。'},
+ {type:'tf',q:'捕球された飛球で走者がリタッチせず進塁した場合、守備側の正しいアピールでアウトになることがある。',choices:['○','×'],answer:0,exp:'リタッチ義務違反はアピールプレイの対象です。'},
+ {type:'mc',q:'一死三塁。外野フライを捕球後、三塁走者がリタッチして本塁へ生還。これは？',choices:['得点になり得る','必ずアウト','必ずファウル'],answer:0,exp:'正しくリタッチして本塁へ到達すれば犠牲フライによる得点になり得ます。'},
+ {type:'tf',q:'走者に進塁義務がない場合、野手が塁を踏むだけでは通常その走者をアウトにできない。',choices:['○','×'],answer:0,exp:'フォース状態でない走者には通常タッグが必要です。'},
+ {type:'mc',q:'ボークが宣告されたとき、一般に走者はどうなる？',choices:['原則1個進塁','必ず元の塁へ戻る','全員アウト'],answer:0,exp:'ボークでは原則として各走者に1個の進塁が与えられます。'},
+ {type:'tf',q:'守備妨害が認められた場合、妨害した側にアウト等の罰則が適用されることがある。',choices:['○','×'],answer:0,exp:'プレーを妨げた状況に応じてアウト等が適用されます。'},
+ {type:'mc',q:'一死一塁。打者が内野ゴロ。遊撃手→二塁→一塁と送球して両方アウト。これは？',choices:['併殺','犠打','ボーク'],answer:0,exp:'1つの連続したプレーで2アウトを取るので併殺です。'},
+ {type:'tf',q:'フェアボールが審判員に当たった場合、必ず即ボールデッドになる。',choices:['○','×'],answer:1,exp:'当たった状況によって扱いが異なり、必ず即ボールデッドではありません。'},
+ {type:'mc',q:'捕手が投球を後逸し、走者が進塁した。記録上考えられるものは？',choices:['暴投または捕逸','必ず盗塁','必ず失策'],answer:0,exp:'投球の性質や捕球可能性により暴投・捕逸などが判断されます。'},
+ {type:'tf',q:'打者走者が一塁を駆け抜けた直後、二塁へ向かう意思を示さなければ、一定条件で一塁へ戻ることができる。',choices:['○','×'],answer:0,exp:'一塁は駆け抜けが認められています。'},
+ {type:'mc',q:'無死一塁。ライナーを一塁手が捕球し、飛び出していた一塁走者より先に一塁へ触れた。結果は？',choices:['併殺になり得る','打者だけアウト','走者だけアウト'],answer:0,exp:'打者は捕球でアウト、走者はリタッチできずアピールでアウトになり得ます。'}
+],
+advanced:[
+ {type:'mc',q:'二死満塁。打者が内野ゴロ。一塁走者が二塁でフォースアウトになる前に三塁走者が本塁を踏んだ。得点は？',choices:['入らない','必ず入る','審判の気分で決まる'],answer:0,exp:'第3アウトがフォースアウトの場合、そのプレーでの得点は認められません。'},
+ {type:'tf',q:'第3アウトが打者走者の一塁到達前のアウトなら、そのプレー中に本塁へ到達した走者の得点は認められない。',choices:['○','×'],answer:0,exp:'第3アウトが打者走者の一塁到達前のアウトの場合、得点は認められません。'},
+ {type:'mc',q:'一死一・三塁。外野フライを捕球。三塁走者はリタッチして生還、一塁走者は離塁が早くアピールで第3アウト。得点は？',choices:['状況により認められる','必ず無効','必ず2点'],answer:0,exp:'第3アウトがフォースアウトでないアピールアウトの場合、得点時期などによって得点が認められることがあります。'},
+ {type:'tf',q:'インフィールドフライが宣告されても、ボールそのものは自動的にボールデッドになるわけではない。',choices:['○','×'],answer:0,exp:'インフィールドフライでもボールは原則インプレイです。'},
+ {type:'mc',q:'一死二塁。ライナーを遊撃手が故意に落として併殺を狙った。適用が問題になるのは？',choices:['故意落球','ボーク','振り逃げ'],answer:0,exp:'一定条件では故意落球に関する規則が適用されます。'},
+ {type:'tf',q:'走者が守備者の送球を故意に妨げた場合、守備妨害になることがある。',choices:['○','×'],answer:0,exp:'故意にプレーを妨げれば守備妨害の対象になります。'},
+ {type:'mc',q:'二死二塁。打者が安打、二塁走者が生還後、打者走者が一塁を回って二塁でタッチアウト。得点は？',choices:['一般に認められる','必ず無効','打者がアウトなので0点'],answer:0,exp:'第3アウトがフォースアウト等でなければ、先に本塁到達した得点が認められる場合があります。'},
+ {type:'tf',q:'アピールプレイによるアウトは、守備側が適切にアピールしなければ成立しない種類がある。',choices:['○','×'],answer:0,exp:'離塁が早い・塁の踏み忘れなどはアピールが必要です。'},
+ {type:'mc',q:'無死一塁。打者がバントし、打球に打者走者がフェア地域で触れて守備を妨げた。考えられる判定は？',choices:['打者走者アウト','必ずファウル','必ず一塁セーフ'],answer:0,exp:'フェアボールに触れて守備を妨げた状況では打者走者アウトとなり得ます。'},
+ {type:'tf',q:'投手がプレートに触れた状態で規則に反するけん制動作をすれば、ボークが宣告されることがある。',choices:['○','×'],answer:0,exp:'投手板に触れている際の不正な投球・送球動作などはボークの対象です。'},
+ {type:'mc',q:'一死満塁。捕球可能な内野フライでインフィールドフライ宣告後、三塁走者が捕球後にリタッチして生還。得点は？',choices:['成立し得る','絶対に無効','打者がアウトなので走者は動けない'],answer:0,exp:'インフィールドフライでもボールはインプレイで、捕球後のリタッチ進塁は可能です。'},
+ {type:'tf',q:'打順を間違えて打席に入っただけで、投球前に必ず自動アウトになる。',choices:['○','×'],answer:1,exp:'打順違いはアピールの時期などで処置が変わり、単純な自動アウトではありません。'}
+],
+boys:[
+ {type:'mc',q:'ボーイズリーグ中学生の部。連盟主催大会の通常試合は何回戦？',choices:['6回','7回','9回'],answer:1,exp:'2026年連盟主催大会規定では中学生の部は7回戦です。'},
+ {type:'mc',q:'中学生の部で正式試合となる目安は何回終了？',choices:['3回','4回','5回'],answer:1,exp:'中学生の部は4回終了をもって正式試合とします。'},
+ {type:'mc',q:'中学生の部。4回終了時のコールドゲーム点差は？',choices:['7点差','10点差','15点差'],answer:1,exp:'4回終了時は10点差、5回以降は7点差でコールドです。'},
+ {type:'mc',q:'中学生の部。5回以降のコールドゲーム点差は？',choices:['5点差','7点差','10点差'],answer:1,exp:'5回以降は7点差でコールドゲームです。'},
+ {type:'mc',q:'ボーイズリーグ中学生の投手。1日の最大投球数は？',choices:['70球','80球','100球'],answer:1,exp:'中学生の部は1日最大80球です。'},
+ {type:'mc',q:'中学生の投手。連続する2日間の合計上限は？',choices:['100球','120球','160球'],answer:1,exp:'連続する2日間で120球以内です。'},
+ {type:'tf',q:'中学生投手が連続する2日間で80球を超えて投げた場合、3日目は投球できない。',choices:['○','×'],answer:0,exp:'2026年大会規定では3日目は投球禁止です。'},
+ {type:'tf',q:'ボーイズリーグの投球数では、ボークも1球として数える。',choices:['○','×'],answer:1,exp:'大会規定ではボークは投球数にしません。'},
+ {type:'tf',q:'雨などでノーゲームになった試合の投球も、投球数にはカウントされる。',choices:['○','×'],answer:0,exp:'ノーゲームになっても投球は投球数にカウントされます。'},
+ {type:'mc',q:'中学生の部のタイブレークは、どの状態から攻撃を始める？',choices:['無死二塁','一死満塁','二死満塁'],answer:1,exp:'連盟主催大会規定のタイブレークは一死走者満塁から開始します。'},
+ {type:'tf',q:'ボーイズリーグでは、二塁走者やベースコーチが捕手のサインを盗み、打者へ球種やコースを伝える行為は禁止されている。',choices:['○','×'],answer:0,exp:'連盟主催大会規定で禁止されています。'},
+ {type:'tf',q:'ベンチ内で携帯電話を使用してもよい。',choices:['○','×'],answer:1,exp:'連盟主催大会規定ではベンチ内での携帯電話使用は禁止です。'},
+ {type:'mc',q:'監督またはコーチの指示は、通常1試合で攻撃・守備それぞれ何回まで？',choices:['各1回','各2回','各3回'],answer:1,exp:'通常は攻撃2回・守備2回、計4回です。'},
+ {type:'tf',q:'1イニングで同一投手への指示が2回目になると、その投手は自動的に試合から退かなければならない。',choices:['○','×'],answer:0,exp:'2026年連盟主催大会規定に定められています。'},
+ {type:'tf',q:'捕手は試合だけでなく練習でも、連盟が定めるヘルメット・防具を着用する。',choices:['○','×'],answer:0,exp:'大会規定では試合・練習を問わず規定防具の着用が必要です。'},
+ {type:'mc',q:'中学生投手が3連投する場合、1日の投球数上限は？',choices:['30球','40球','50球'],answer:1,exp:'3連投する場合は1日の投球数を40球以内とします。'},
+ {type:'tf',q:'中学生投手の4連投（連続4日間）は認められている。',choices:['○','×'],answer:1,exp:'4連投は禁止されています。'},
+ {type:'tf',q:'投球数制限に達したのが打者の途中なら、その打者の打席終了までは投球できる。',choices:['○','×'],answer:0,exp:'打者途中で制限数に達した場合、その打席終了までは投球が認められます。'},
+ {type:'mc',q:'中学生の部のタイブレークで、規定により置かれる3走者の扱いは？',choices:['投手の自責点になる','投手の自責点にはしない','全員代走扱い'],answer:1,exp:'規定により出塁した3走者は投手の自責点にはなりません。'},
+ {type:'tf',q:'審判員の判定そのものへの抗議は認められないが、ルールの適用について確認することは認められる。',choices:['○','×'],answer:0,exp:'連盟主催大会規定ではこのように定められています。'}
+]
+};
+
+const QUIZ_LEVEL_NAMES={
+  beginner:'🌱 初級',
+  intermediate:'⚾ 中級',
+  advanced:'🔥 上級',
+  boys:'🏆 ボーイズ実戦'
+};
 
 function shuffleArray(arr){
   const a=[...arr];
@@ -406,10 +485,21 @@ function shuffleArray(arr){
   }
   return a;
 }
-function startRules(){
-  S.quizQuestions=shuffleArray(RULE_QUESTIONS).slice(0,10);
-  S.quizIndex=0;S.quizCorrect=0;S.quizLocked=false;
+function showRuleLevelSelect(){
   show('rulesAns');
+  $('#quizLevelSelect').classList.remove('hidden');
+  $('#quizPlay').classList.add('hidden');
+}
+function chooseRuleLevel(level){
+  if(!RULE_QUESTIONS[level])return;
+  S.quizLevel=level;
+  S.quizQuestions=shuffleArray(RULE_QUESTIONS[level]).slice(0,10);
+  S.quizIndex=0;
+  S.quizCorrect=0;
+  S.quizLocked=false;
+  $('#quizLevelSelect').classList.add('hidden');
+  $('#quizPlay').classList.remove('hidden');
+  $('#quizLevelName').textContent=QUIZ_LEVEL_NAMES[level];
   renderRuleQuestion();
 }
 function renderRuleQuestion(){
@@ -437,7 +527,7 @@ function answerRule(idx){
   $('#quizExplain').classList.remove('hidden');
   $('#quizExplain').textContent=(ok?'○ 正解！ +20pt':'× 不正解')+'\n'+q.exp;
   $('#quizExplain').style.whiteSpace='pre-line';
-  setTimeout(()=>{S.quizIndex++;renderRuleQuestion()},1200);
+  setTimeout(()=>{S.quizIndex++;renderRuleQuestion()},1450);
 }
 function finishRules(){
   S.running=false;
@@ -446,7 +536,7 @@ function finishRules(){
   if(bonus)addPoints(bonus);
   $('#msg').classList.remove('hidden');
   $('#msg').style.whiteSpace='pre-line';
-  let t='ルールクイズ終了！\n10問中 '+S.quizCorrect+'問正解';
+  let t=QUIZ_LEVEL_NAMES[S.quizLevel]+' 終了！\n10問中 '+S.quizCorrect+'問正解';
   if(bonus)t+='\nボーナス +'+bonus+'pt';
   if(S.quizCorrect===10)t+='\n🏆 PERFECT！';
   $('#msg').textContent=t;
@@ -561,6 +651,7 @@ $('#stopBtn').addEventListener('click',()=>{S.running=false;clearTimeout(S.timer
 document.body.addEventListener('click',e=>{let b=e.target.closest('[data-answer]');if(b)answer(b.dataset.answer)});
 document.body.addEventListener('click',e=>{let b=e.target.closest('[data-number]');if(b)numberTap(b)});
 document.body.addEventListener('click',e=>{let b=e.target.closest('[data-quiz]');if(b)answerRule(b.dataset.quiz)});
+document.body.addEventListener('click',e=>{let b=e.target.closest('[data-quiz-level]');if(b)chooseRuleLevel(b.dataset.quizLevel)});
 $('#reactionBtn').addEventListener('click',()=>answer('tap'));
 $('#clearBtn').addEventListener('click',()=>{if(confirm('今日の記録を削除しますか？')){S.records=[];S.streak=0;S.bestStreak=0;localStorage.removeItem(key());renderStats()}});
 load();
