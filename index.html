@@ -160,7 +160,7 @@ padding:12px 16px;border-radius:13px;font-weight:800;text-align:center;backdrop-
   <section id="screenTop" class="screen active">
     <div class="topHeader">
       <h1>⚾ 野球ビジョントレーナー</h1>
-      <div class="sub">視覚・反応・判断・ルール　<span class="version">v1.4</span></div>
+      <div class="sub">視覚・反応・判断・ルール　<span class="version">v1.5</span></div>
     </div>
 
     <section class="card">
@@ -445,9 +445,9 @@ function openSettings(mode){
   }else if(mode==='score'){
     diff.classList.remove('hidden');
     btns.innerHTML=`
-      <button data-diff="beginner">🌱 初級<br><span class="sub">記号→意味</span></button>
-      <button data-diff="intermediate">⚾ 中級<br><span class="sub">意味→記号</span></button>
-      <button data-diff="advanced">🔥 上級<br><span class="sub">実戦読み取り</span></button>`;
+      <button data-diff="beginner">🌱 初級<br><span class="sub">基本記号</span></button>
+      <button data-diff="intermediate">⚾ 中級<br><span class="sub">打球・進塁</span></button>
+      <button data-diff="advanced">🔥 上級<br><span class="sub">1マス読解</span></button>`;
     S.difficulty='beginner';
   }else if(mode==='flash'||mode==='reaction'){
     diff.classList.remove('hidden');
@@ -792,44 +792,124 @@ function finishRules(){
 }
 
 
+
 /* SCOREBOOK QUIZ */
-const SCORE_ITEMS=[
- {symbol:'Ⅰ',label:'1アウト',type:'text',ex:'中央のローマ数字Ⅰは、そのプレーで1アウト目になったことを示します。'},
- {symbol:'Ⅱ',label:'2アウト',type:'text',ex:'中央のローマ数字Ⅱは2アウト目を示します。'},
- {symbol:'Ⅲ',label:'3アウト',type:'text',ex:'中央のローマ数字Ⅲは3アウト目を示します。'},
- {symbol:'ℓ',label:'残塁',type:'text',ex:'ℓは残塁を表す代表的な記号です。'},
- {symbol:'S',label:'盗塁',type:'text',ex:'Sは盗塁（Stolen Base）を表します。'},
- {symbol:'CS',label:'盗塁死',type:'text',ex:'CSはCaught Stealing、盗塁死です。'},
- {symbol:'W',label:'暴投',type:'text',ex:'Wはワイルドピッチ（暴投）を表します。'},
- {symbol:'P',label:'捕逸',type:'text',ex:'Pはパスボール（捕逸）を表します。'},
- {symbol:'BK',label:'ボーク',type:'text',ex:'BKはボークを表します。'},
- {symbol:'Fc',label:'野手選択',type:'text',ex:'FcはFielder’s Choice、野手選択です。'},
- {symbol:'DP',label:'併殺',type:'text',ex:'DPはDouble Play、併殺を表します。'},
- {symbol:'A',label:'一塁',type:'text',ex:'早稲田式ではベースをA=一塁、B=二塁、C=三塁、D=本塁と表します。'},
- {symbol:'B',label:'二塁',type:'text',ex:'Bは二塁を表します。'},
- {symbol:'C',label:'三塁',type:'text',ex:'Cは三塁を表します。'},
- {symbol:'D',label:'本塁',type:'text',ex:'Dは本塁を表します。'},
- {symbol:'1-3',label:'投手→一塁手でアウト',type:'text',ex:'守備番号1は投手、3は一塁手。1-3は投手が処理して一塁手へ送球してアウトにした形です。'},
- {symbol:'3A',label:'一塁手が自ら一塁を踏んでアウト',type:'text',ex:'3は一塁手、Aは一塁。3Aは一塁手が自分で一塁ベースを踏んだ記録です。'}
+const SCORE_BEGINNER=[
+ {symbol:'Ⅰ',label:'1アウト',ex:'中央のローマ数字Ⅰは、そのプレーで1アウト目になったことを示します。'},
+ {symbol:'Ⅱ',label:'2アウト',ex:'中央のローマ数字Ⅱは2アウト目を示します。'},
+ {symbol:'Ⅲ',label:'3アウト',ex:'中央のローマ数字Ⅲは3アウト目を示します。'},
+ {symbol:'●',label:'得点（自責点）',ex:'塗りつぶした赤丸は得点を表す代表的な書き方です。'},
+ {symbol:'○',label:'得点（自責なし）',ex:'白抜きの丸は得点を表し、自責点でないことを区別する書き方として使われます。'},
+ {symbol:'ℓ',label:'残塁',ex:'ℓは残塁を表す代表的な記号です。'},
+ {symbol:'S',label:'盗塁',ex:'SはStolen Base、盗塁です。'},
+ {symbol:'CS',label:'盗塁死',ex:'CSはCaught Stealing、盗塁死です。'},
+ {symbol:'W',label:'暴投',ex:'WはWild Pitch、暴投です。'},
+ {symbol:'P',label:'捕逸',ex:'PはPassed Ball、捕逸です。'},
+ {symbol:'BK',label:'ボーク',ex:'BKはボークです。'},
+ {symbol:'Fc',label:'野手選択',ex:'FcはFielder’s Choice、野手選択です。'},
+ {symbol:'DP',label:'併殺',ex:'DPはDouble Play、併殺です。'},
+ {symbol:'1',label:'投手',ex:'守備番号1は投手です。'},
+ {symbol:'2',label:'捕手',ex:'守備番号2は捕手です。'},
+ {symbol:'3',label:'一塁手',ex:'守備番号3は一塁手です。'},
+ {symbol:'4',label:'二塁手',ex:'守備番号4は二塁手です。'},
+ {symbol:'5',label:'三塁手',ex:'守備番号5は三塁手です。'},
+ {symbol:'6',label:'遊撃手',ex:'守備番号6は遊撃手です。'},
+ {symbol:'7',label:'左翼手',ex:'守備番号7は左翼手です。'},
+ {symbol:'8',label:'中堅手',ex:'守備番号8は中堅手です。'},
+ {symbol:'9',label:'右翼手',ex:'守備番号9は右翼手です。'}
 ];
 
-const FIELD_NUMBERS=[
- ['1','投手'],['2','捕手'],['3','一塁手'],['4','二塁手'],['5','三塁手'],['6','遊撃手'],['7','左翼手'],['8','中堅手'],['9','右翼手']
+const SCORE_INTERMEDIATE=[
+ {symbol:'7',label:'左翼への単打',ex:'守備番号7は左翼手。単打なら左翼へのヒットとして読みます。'},
+ {symbol:'8',label:'中堅への単打',ex:'守備番号8は中堅手。単打なら中堅へのヒットです。'},
+ {symbol:'9',label:'右翼への単打',ex:'守備番号9は右翼手。単打なら右翼へのヒットです。'},
+ {symbol:'7 / 2B',label:'左翼方向の二塁打',ex:'二塁打は打球到達と進塁を組み合わせて記録します。'},
+ {symbol:'8 / 3B',label:'中堅方向の三塁打',ex:'三塁打は三塁まで進んだ長打です。'},
+ {symbol:'9 / HR',label:'右翼方向の本塁打',ex:'HRは本塁打。守備番号と組み合わせて方向も読み取れます。'},
+ {symbol:'1-3',label:'投手→一塁手でアウト',ex:'1は投手、3は一塁手。投手が処理して一塁へ送球したゴロアウトです。'},
+ {symbol:'6-3',label:'遊撃手→一塁手でアウト',ex:'6は遊撃手、3は一塁手。典型的な遊ゴロです。'},
+ {symbol:'4-3',label:'二塁手→一塁手でアウト',ex:'4は二塁手、3は一塁手。典型的な二ゴロです。'},
+ {symbol:'5-3',label:'三塁手→一塁手でアウト',ex:'5は三塁手、3は一塁手。典型的な三ゴロです。'},
+ {symbol:'3A',label:'一塁手が自ら一塁を踏んでアウト',ex:'3は一塁手、Aは一塁。送球せず自分で一塁を踏んだプレーです。'},
+ {symbol:'K',label:'空振り三振',ex:'Kは三振を表す代表的な記号です。'},
+ {symbol:'SO',label:'見逃し三振',ex:'スコア方式により表記差がありますが、見逃し三振を区別して記録します。'},
+ {symbol:'SH',label:'犠打',ex:'SHはSacrifice Hit、犠打です。'},
+ {symbol:'SF',label:'犠飛',ex:'SFはSacrifice Fly、犠牲フライです。'}
 ];
 
-function scoreVisual(item){
-  if(item.type==='runEarned')return `<div class="scoreDiamond"><div class="scoreRunDot"></div></div><div class="scoreSymbolSub">得点</div>`;
-  if(item.type==='runUnearned')return `<div class="scoreDiamond"><div class="scoreRunRing"></div></div><div class="scoreSymbolSub">得点</div>`;
-  return `<div class="scoreSymbolText">${item.symbol}</div>`;
+const SCORE_ADVANCED=[
+ {
+  symbol:'Ⅰ / 6-3',
+  label:'1アウト目。遊撃手が処理して一塁送球で打者アウト',
+  ex:'Ⅰは1アウト目、6-3は遊撃手→一塁手。1つのマスでアウト数と守備経路を読みます。'
+ },
+ {
+  symbol:'Ⅱ / 4-3',
+  label:'2アウト目。二塁手が処理して一塁送球で打者アウト',
+  ex:'Ⅱは2アウト目、4-3は二塁手→一塁手です。'
+ },
+ {
+  symbol:'Ⅲ / 5-3',
+  label:'3アウト目。三塁手が処理して一塁送球で打者アウト',
+  ex:'Ⅲは3アウト目、5-3は三塁手→一塁手です。'
+ },
+ {
+  symbol:'S → B',
+  label:'盗塁で二塁へ進塁',
+  ex:'Sは盗塁、Bは二塁。盗塁による二塁進塁と読みます。'
+ },
+ {
+  symbol:'CS → B',
+  label:'二塁盗塁を試みて盗塁死',
+  ex:'CSは盗塁死。二塁へ進もうとしてアウトになったプレーです。'
+ },
+ {
+  symbol:'W → B',
+  label:'暴投で二塁へ進塁',
+  ex:'Wは暴投。走者が暴投で次塁へ進んだことを示します。'
+ },
+ {
+  symbol:'P → B',
+  label:'捕逸で二塁へ進塁',
+  ex:'Pは捕逸。捕手の捕逸で走者が進んだ記録です。'
+ },
+ {
+  symbol:'DP / 6-4-3',
+  label:'遊撃手→二塁手→一塁手の併殺',
+  ex:'DPは併殺。6-4-3は遊撃手→二塁手→一塁手の典型的なダブルプレーです。'
+ },
+ {
+  symbol:'7 / ●',
+  label:'左翼方向の安打後に得点',
+  ex:'7は左翼方向、●は得点。1マス内の複数情報を組み合わせて読みます。'
+ },
+ {
+  symbol:'ℓ / B',
+  label:'二塁に走者を残して残塁',
+  ex:'ℓは残塁、Bは二塁。二塁に残ったまま攻撃終了と読みます。'
+ }
+];
+
+function getScorePool(){
+  if(S.difficulty==='beginner')return SCORE_BEGINNER;
+  if(S.difficulty==='intermediate')return SCORE_INTERMEDIATE;
+  return SCORE_ADVANCED;
 }
-function scorePool(){
-  let p=[...SCORE_ITEMS];
-  FIELD_NUMBERS.forEach(([n,pos])=>p.push({symbol:n,label:pos,type:'field',ex:`守備番号${n}は${pos}です。`}));
-  return p;
+function scoreVisual(item){
+  const s=item.symbol;
+  if(s==='●'){
+    return `<div class="scoreDiamond"><div class="scoreRunDot"></div></div><div class="scoreSymbolSub">得点</div>`;
+  }
+  if(s==='○'){
+    return `<div class="scoreDiamond"><div class="scoreRunRing"></div></div><div class="scoreSymbolSub">得点</div>`;
+  }
+  return `<div class="scoreSymbolText">${s}</div>`;
 }
 function startScoreQuiz(){
-  const pool=scorePool();
-  S.scoreQuestions=shuffleArray(pool).slice(0,10);
+  const pool=getScorePool();
+  let q=[];
+  while(q.length<10)q=q.concat(shuffleArray(pool));
+  S.scoreQuestions=q.slice(0,10);
   S.scoreIndex=0;S.scoreCorrect=0;S.scoreLocked=false;
   renderScoreQuestion();
 }
@@ -845,31 +925,38 @@ function renderScoreQuestion(){
   $('#progressText').textContent=(S.scoreIndex+1)+'/10';
   $('#progress').style.width=((S.scoreIndex+1)/10*100)+'%';
 
-  let choices=[];
+  const pool=getScorePool();
+
   if(S.difficulty==='beginner'){
     $('#scoreQuestion').textContent='この記号の意味は？';
     $('#scoreSymbol').classList.remove('hidden');
     $('#scoreSymbol').innerHTML=scoreVisual(item);
-    const wrong=shuffleArray(scorePool().filter(x=>x.label!==item.label)).slice(0,3).map(x=>x.label);
-    choices=shuffleArray([item.label,...wrong]);
+
+    const wrong=shuffleArray(pool.filter(x=>x.label!==item.label)).slice(0,3).map(x=>x.label);
+    const choices=shuffleArray([item.label,...wrong]);
+    $('#scoreChoices').innerHTML=choices.map(c=>`<button data-score="${c.replace(/"/g,'&quot;')}">${c}</button>`).join('');
+    S.scoreAnswer=item.label;
+
   }else if(S.difficulty==='intermediate'){
-    $('#scoreQuestion').textContent=`「${item.label}」を表す記号はどれ？`;
+    $('#scoreQuestion').textContent=`「${item.label}」を表す記録はどれ？`;
     $('#scoreSymbol').classList.add('hidden');
-    const wrong=shuffleArray(scorePool().filter(x=>x.symbol!==item.symbol)).slice(0,3).map(x=>x.symbol);
-    choices=shuffleArray([item.symbol,...wrong]);
+
+    const wrong=shuffleArray(pool.filter(x=>x.symbol!==item.symbol)).slice(0,3).map(x=>x.symbol);
+    const choices=shuffleArray([item.symbol,...wrong]);
+    $('#scoreChoices').innerHTML=choices.map(c=>`<button data-score="${c.replace(/"/g,'&quot;')}">${c}</button>`).join('');
+    S.scoreAnswer=item.symbol;
+
   }else{
-    $('#scoreQuestion').textContent=item.symbol==='1-3'
-      ?'スコアに「1-3」とあります。プレー内容として正しいのは？'
-      :item.symbol==='3A'
-      ?'スコアに「3A」とあります。プレー内容として正しいのは？'
-      :`この記号「${item.symbol}」を実戦で見たときの意味は？`;
+    $('#scoreQuestion').textContent='この1マスから読み取れるプレーは？';
     $('#scoreSymbol').classList.remove('hidden');
     $('#scoreSymbol').innerHTML=scoreVisual(item);
-    const wrong=shuffleArray(scorePool().filter(x=>x.label!==item.label)).slice(0,3).map(x=>x.label);
-    choices=shuffleArray([item.label,...wrong]);
+
+    const wrong=shuffleArray(pool.filter(x=>x.label!==item.label)).slice(0,3).map(x=>x.label);
+    const choices=shuffleArray([item.label,...wrong]);
+    $('#scoreChoices').innerHTML=choices.map(c=>`<button data-score="${c.replace(/"/g,'&quot;')}">${c}</button>`).join('');
+    S.scoreAnswer=item.label;
   }
-  $('#scoreChoices').innerHTML=choices.map(c=>`<button data-score="${c.replace(/"/g,'&quot;')}">${c}</button>`).join('');
-  S.scoreAnswer=S.difficulty==='intermediate'?item.symbol:item.label;
+
   S.scoreCurrent=item;
   S.scoreLocked=false;
 }
