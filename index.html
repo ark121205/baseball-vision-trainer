@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#08142c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="野球ビジョン">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>野球ビジョントレーナー</title>
+<style>
+:root{
+  --bg:#071225;--panel:#102347;--panel2:#132c58;--text:#f4f8ff;--muted:#9db1d5;
+  --blue:#64baff;--good:#42d18b;--bad:#ff6f82;--line:rgba(255,255,255,.12)
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:linear-gradient(180deg,#061023,#0b1833);color:var(--text);
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
+.app{max-width:760px;margin:auto;padding:calc(12px + env(safe-area-inset-top)) 14px calc(20px + env(safe-area-inset-bottom))}
+h1{font-size:24px;margin:6px 0}.sub{font-size:12px;color:var(--muted)}
+.card{background:rgba(16,35,71,.97);border:1px solid var(--line);border-radius:20px;padding:15px;margin:12px 0}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.statgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.stat{background:#0b1a36;border-radius:13px;padding:9px 5px;text-align:center}
+.stat b{display:block;font-size:18px}.stat span{font-size:10px;color:var(--muted)}
+button{border:0;border-radius:14px;padding:12px 10px;background:#1a3e78;color:white;font-weight:700;font-size:15px}
+button:active{transform:scale(.985)}button.primary{background:linear-gradient(135deg,#2797ea,#71c5ff);color:#04152b}
+button.ghost{background:#0b1a36;color:#cfe4ff}
+button.good{background:#135b3d}button.bad{background:#6b2732}
+.seg{display:flex;gap:7px;flex-wrap:wrap}.seg button{flex:1 1 auto;font-size:12px;padding:10px 7px}
+.seg .active{outline:2px solid var(--blue);background:#24569b}
+input[type=range]{width:100%}
+.arena{height:430px;position:relative;overflow:hidden;border-radius:22px;background:
+radial-gradient(circle at 50% 10%,#28507a 0,#102a52 28%,#09192f 62%,#061123 100%);border:1px solid var(--line)}
+.mound{position:absolute;left:50%;top:18%;transform:translateX(-50%);width:27px;height:8px;background:#b8aa85;border-radius:50%}
+.zone{position:absolute;width:210px;height:255px;left:50%;bottom:72px;transform:translateX(-50%);
+border:2px solid rgba(255,255,255,.75);display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr)}
+.zone div{border:1px solid rgba(255,255,255,.15)}
+.plate{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);width:60px;height:44px;background:#f2f4f7;
+clip-path:polygon(0 0,100% 0,86% 64%,50% 100%,14% 64%)}
+.ball{position:absolute;width:36px;height:36px;left:calc(50% - 18px);top:54px;border-radius:50%;background:#fff;
+color:#0a1426;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;
+box-shadow:0 0 0 2px #d9d9d9 inset,0 0 15px rgba(255,255,255,.45);z-index:5}
+.msg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:8;background:rgba(0,0,0,.58);
+padding:12px 16px;border-radius:13px;font-weight:800;text-align:center;backdrop-filter:blur(4px)}
+.hidden{display:none!important}.answers{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:11px}
+.answers button{font-size:13px;padding:11px 4px}.answers.two{grid-template-columns:1fr 1fr}
+.note{font-size:11px;line-height:1.55;color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:7px 3px;border-bottom:1px solid var(--line);text-align:center}
+th{color:#bcd0ef}.bar{height:8px;background:#08172e;border-radius:8px;overflow:hidden}.bar>div{height:100%;background:#5ab9ff}
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>⚾ 野球ビジョントレーナー</h1>
+  <div class="sub">動体視力・瞬間視・選球眼・反応速度</div>
+
+  <section class="card statgrid">
+    <div class="stat"><b id="todayCount">0</b><span>今日</span></div>
+    <div class="stat"><b id="rate">-</b><span>正答率</span></div>
+    <div class="stat"><b id="avgRt">-</b><span>平均反応</span></div>
+    <div class="stat"><b id="bestStreak">0</b><span>連続正解</span></div>
+  </section>
+
+  <section class="card">
+    <div class="row"><strong>モード</strong><span class="sub" id="modeName">コース判定</span></div>
+    <div class="seg" style="margin-top:9px">
+      <button class="mode active" data-mode="course">コース</button>
+      <button class="mode" data-mode="pitch">球種</button>
+      <button class="mode" data-mode="flash">瞬間視</button>
+      <button class="mode" data-mode="select">選球眼</button>
+      <button class="mode" data-mode="reaction">反応</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="row"><span>疑似球速</span><strong><span id="speedText">120</span> km/h</strong></div>
+    <input id="speed" type="range" min="80" max="150" step="5" value="120">
+    <div class="row" style="margin-top:8px">
+      <span>打席</span>
+      <div class="seg" style="width:64%">
+        <button id="leftBat" class="active">左打者</button>
+        <button id="rightBat">右打者</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div id="arena" class="arena">
+      <div class="mound"></div>
+      <div class="zone">
+        <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+      </div>
+      <div class="plate"></div>
+      <div id="ball" class="ball hidden"></div>
+      <div id="msg" class="msg">「開始」を押してください</div>
+    </div>
+
+    <div id="courseAns" class="answers hidden">
+      <button data-answer="1">左上</button><button data-answer="2">上</button><button data-answer="3">右上</button>
+      <button data-answer="4">左</button><button data-answer="5">中央</button><button data-answer="6">右</button>
+      <button data-answer="7">左下</button><button data-answer="8">下</button><button data-answer="9">右下</button>
+    </div>
+
+    <div id="pitchAns" class="answers hidden">
+      <button data-answer="straight">ストレート</button>
+      <button data-answer="slider">スライダー</button>
+      <button data-answer="curve">カーブ</button>
+      <button data-answer="fork">フォーク</button>
+      <button data-answer="change">チェンジ</button>
+    </div>
+
+    <div id="flashAns" class="answers hidden"></div>
+
+    <div id="selectAns" class="answers two hidden">
+      <button class="good" data-answer="swing">打つ</button>
+      <button class="bad" data-answer="take">見逃す</button>
+    </div>
+
+    <div id="reactionAns" class="answers hidden" style="grid-template-columns:1fr">
+      <button id="reactionBtn" class="primary">光ったらタップ</button>
+    </div>
+
+    <div class="answers two">
+      <button id="startBtn" class="primary">開始</button>
+      <button id="stopBtn" class="ghost">停止</button>
+    </div>
+    <div class="note" style="margin-top:8px">1セット30球。球速表示はトレーニング用の疑似速度です。</div>
+  </section>
+
+  <section class="card">
+    <div class="row"><strong>今日の進捗</strong><span class="sub"><span id="setCount">0</span>/30球</span></div>
+    <div class="bar" style="margin-top:8px"><div id="progress" style="width:0%"></div></div>
+  </section>
+
+  <section class="card">
+    <strong>最近の結果</strong>
+    <div style="overflow:auto;margin-top:7px">
+      <table>
+        <thead><tr><th>時刻</th><th>モード</th><th>結果</th><th>反応</th></tr></thead>
+        <tbody id="history"></tbody>
+      </table>
+    </div>
+    <button id="clearBtn" class="ghost" style="width:100%;margin-top:9px">今日の記録をクリア</button>
+  </section>
+</div>
+
+<script>
+(()=>{
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const names={course:'コース判定',pitch:'球種判定',flash:'瞬間視',select:'選球眼',reaction:'反応速度'};
+const S={mode:'course',speed:120,batter:'left',running:false,round:0,answer:null,startTs:0,streak:0,bestStreak:0,ready:false,timer:null,records:[]};
+
+function key(){let d=new Date();return 'bvt_'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function load(){try{S.records=JSON.parse(localStorage.getItem(key())||'[]')}catch(e){S.records=[]}renderStats()}
+function save(){localStorage.setItem(key(),JSON.stringify(S.records));renderStats()}
+function renderStats(){
+  $('#todayCount').textContent=S.records.length;
+  const answered=S.records.filter(r=>r.correct!==null), ok=answered.filter(r=>r.correct).length;
+  $('#rate').textContent=answered.length?Math.round(ok/answered.length*100)+'%':'-';
+  const rts=S.records.filter(r=>r.rt!=null).map(r=>r.rt);
+  $('#avgRt').textContent=rts.length?Math.round(rts.reduce((a,b)=>a+b,0)/rts.length)+'ms':'-';
+  $('#bestStreak').textContent=Math.max(S.bestStreak, ...S.records.map(r=>r.streak||0),0);
+  $('#history').innerHTML=S.records.slice(-10).reverse().map(r=>`<tr><td>${r.time}</td><td>${names[r.mode]}</td><td>${r.correct===null?'—':r.correct?'○':'×'}</td><td>${r.rt==null?'—':Math.round(r.rt)+'ms'}</td></tr>`).join('');
+}
+function show(id){['courseAns','pitchAns','flashAns','selectAns','reactionAns'].forEach(x=>$('#'+x).classList.add('hidden')); if(id)$('#'+id).classList.remove('hidden')}
+function resetBall(){let b=$('#ball');b.classList.add('hidden');b.style.transition='none';b.style.transform='translate(0,0) scale(.55)';b.textContent=''}
+function duration(){return Math.max(300,1350-(S.speed-80)*14)}
+function coursePos(i){let c=(i-1)%3,r=Math.floor((i-1)/3);return{x:(c-1)*68,y:225+r*67}}
+function animate(x,y,letter=''){let b=$('#ball');b.classList.remove('hidden');b.textContent=letter;b.style.transition='none';b.style.transform='translate(0,0) scale(.5)';
+requestAnimationFrame(()=>requestAnimationFrame(()=>{b.style.transition=`transform ${duration()}ms cubic-bezier(.18,.72,.22,1)`;b.style.transform=`translate(${x}px,${y}px) scale(1.08)`}))}
+function feedback(ok,rt){S.streak=ok?S.streak+1:0;S.bestStreak=Math.max(S.bestStreak,S.streak);S.records.push({time:new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}),mode:S.mode,correct:ok,rt,streak:S.streak});save();
+$('#msg').classList.remove('hidden');$('#msg').textContent=ok?'○ 正解':'× 不正解';show(null);setTimeout(next,600)}
+function updateProgress(){$('#setCount').textContent=S.round;$('#progress').style.width=Math.min(100,S.round/30*100)+'%'}
+function next(){
+  if(!S.running)return;
+  if(S.round>=30){S.running=false;show(null);resetBall();$('#msg').classList.remove('hidden');$('#msg').textContent='30球終了！';return}
+  S.round++;updateProgress();$('#msg').classList.add('hidden');resetBall();clearTimeout(S.timer);
+  if(S.mode==='course')course(); if(S.mode==='pitch')pitch(); if(S.mode==='flash')flash(); if(S.mode==='select')select(); if(S.mode==='reaction')reaction();
+}
+function course(){show('courseAns');S.answer=String(1+Math.floor(Math.random()*9));let p=coursePos(+S.answer);animate(p.x,p.y);S.startTs=performance.now()+duration()}
+function pitch(){
+ show('pitchAns');let arr=['straight','slider','curve','fork','change'];let t=arr[Math.floor(Math.random()*arr.length)];S.answer=t;
+ let x=0,y=coursePos(5).y;
+ if(t==='slider')x+=(S.batter==='left'?78:-78);
+ if(t==='curve'){x+=(S.batter==='left'?55:-55);y+=42}
+ if(t==='fork')y+=72;if(t==='change')y+=25;
+ animate(x,y);S.startTs=performance.now()+duration()
+}
+function flash(){
+ let chars=['2','3','4','5','6','7','8','9'];let c=chars[Math.floor(Math.random()*chars.length)];S.answer=c;
+ $('#flashAns').innerHTML=chars.map(x=>`<button data-answer="${x}">${x}</button>`).join('');show('flashAns');animate(0,250,c);
+ setTimeout(()=>{$('#ball').textContent=''},Math.max(80,duration()*.52));S.startTs=performance.now()+duration()
+}
+function select(){
+ show('selectAns');let strike=Math.random()<.68;S.answer=strike?'swing':'take';let x,y;
+ if(strike){let p=coursePos(1+Math.floor(Math.random()*9));x=p.x;y=p.y}else{let a=[[-145,210],[145,210],[-130,315],[130,315],[0,390]];[x,y]=a[Math.floor(Math.random()*a.length)]}
+ animate(x,y);S.startTs=performance.now()+duration()
+}
+function reaction(){
+ show('reactionAns');S.ready=false;S.answer='tap';$('#reactionBtn').textContent='待って…';$('#reactionBtn').classList.remove('good');
+ let d=900+Math.random()*1800;S.timer=setTimeout(()=>{if(!S.running)return;S.ready=true;S.startTs=performance.now();$('#reactionBtn').textContent='今！タップ';$('#reactionBtn').classList.add('good')},d)
+}
+function answer(v){
+ if(!S.running||S.answer===null)return;
+ if(S.mode==='reaction'&&!S.ready){S.records.push({time:new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}),mode:S.mode,correct:false,rt:null,streak:0});S.streak=0;save();$('#msg').classList.remove('hidden');$('#msg').textContent='早すぎ！';show(null);setTimeout(next,650);return}
+ let rt=Math.max(0,performance.now()-S.startTs),ok=String(v)===String(S.answer);S.answer=null;feedback(ok,rt)
+}
+$$('.mode').forEach(b=>b.addEventListener('click',()=>{if(S.running)return;$$('.mode').forEach(x=>x.classList.remove('active'));b.classList.add('active');S.mode=b.dataset.mode;$('#modeName').textContent=names[S.mode]}));
+$('#speed').addEventListener('input',e=>{S.speed=+e.target.value;$('#speedText').textContent=S.speed});
+$('#leftBat').addEventListener('click',()=>{S.batter='left';$('#leftBat').classList.add('active');$('#rightBat').classList.remove('active')});
+$('#rightBat').addEventListener('click',()=>{S.batter='right';$('#rightBat').classList.add('active');$('#leftBat').classList.remove('active')});
+$('#startBtn').addEventListener('click',()=>{S.running=true;S.round=0;S.streak=0;updateProgress();next()});
+$('#stopBtn').addEventListener('click',()=>{S.running=false;clearTimeout(S.timer);show(null);resetBall();$('#msg').classList.remove('hidden');$('#msg').textContent='停止しました'});
+document.body.addEventListener('click',e=>{let b=e.target.closest('[data-answer]');if(b)answer(b.dataset.answer)});
+$('#reactionBtn').addEventListener('click',()=>answer('tap'));
+$('#clearBtn').addEventListener('click',()=>{if(confirm('今日の記録を削除しますか？')){S.records=[];S.streak=0;S.bestStreak=0;localStorage.removeItem(key());renderStats()}});
+load();
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}))}
+})();
+</script>
+</body>
+</html>
