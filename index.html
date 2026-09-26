@@ -129,6 +129,28 @@ padding:12px 16px;border-radius:13px;font-weight:800;text-align:center;backdrop-
   transform:scale(1.02);
 }
 
+
+.scoreSymbol{
+  width:100%;min-height:135px;border-radius:16px;background:#f5f5f2;color:#111;
+  display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;
+  border:1px solid rgba(255,255,255,.15);margin:10px 0 12px
+}
+.scoreDiamond{
+  width:92px;height:92px;border:3px solid #555;transform:rotate(45deg);position:relative;background:white
+}
+.scoreDiamond .center{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-45deg);
+  font-size:32px;font-weight:900;color:#222;white-space:nowrap
+}
+.scoreSymbolText{font-size:44px;font-weight:900;font-family:Georgia,"Times New Roman",serif}
+.scoreSymbolSub{position:absolute;bottom:8px;left:0;right:0;text-align:center;font-size:11px;color:#555}
+.scoreRunDot{width:20px;height:20px;border-radius:50%;background:#e11;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}
+.scoreRunRing{width:20px;height:20px;border-radius:50%;border:3px solid #e44;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:white}
+.scoreQuizChoices{display:grid;gap:10px}
+.scoreQuizChoices button{min-height:52px;font-size:16px}
+.scoreExplain{margin-top:10px;padding:12px;border-radius:12px;background:#102446;line-height:1.55}
+.scoreLegend{font-size:11px;color:#9db1d5;line-height:1.45;margin-top:8px}
+
 </style>
 </head>
 <body>
@@ -138,7 +160,7 @@ padding:12px 16px;border-radius:13px;font-weight:800;text-align:center;backdrop-
   <section id="screenTop" class="screen active">
     <div class="topHeader">
       <h1>⚾ 野球ビジョントレーナー</h1>
-      <div class="sub">視覚・反応・判断・ルール　<span class="version">v1.3</span></div>
+      <div class="sub">視覚・反応・判断・ルール　<span class="version">v1.4</span></div>
     </div>
 
     <section class="card">
@@ -168,6 +190,7 @@ padding:12px 16px;border-radius:13px;font-weight:800;text-align:center;backdrop-
         <button class="menuCard" data-menu="reaction"><span class="icon">⚡</span><strong>反応速度</strong><span>光った瞬間にタップ</span></button>
         <button class="menuCard" data-menu="numbers"><span class="icon">🔢</span><strong>数字タップ</strong><span>視野・探索・記憶を鍛える</span></button>
         <button class="menuCard" data-menu="rules" style="grid-column:1 / -1"><span class="icon">📘</span><strong>野球ルールクイズ</strong><span>初級〜ボーイズ実戦まで</span></button>
+        <button class="menuCard" data-menu="score" style="grid-column:1 / -1"><span class="icon">📝</span><strong>スコア記号クイズ</strong><span>早稲田式の記号を見て読めるようにする</span></button>
       </div>
     </section>
   </section>
@@ -278,6 +301,20 @@ padding:12px 16px;border-radius:13px;font-weight:800;text-align:center;backdrop-
       <button id="quizNextBtn" class="quizNext hidden">次の問題へ →</button>
     </section>
 
+
+    <section id="scoreTrainingCard" class="card hidden">
+      <div class="quizMeta">
+        <span><strong id="scoreLevelName"></strong>　問題 <strong id="scoreNo">1</strong>/10</span>
+        <span>正解 <strong id="scoreCorrect">0</strong></span>
+      </div>
+      <div id="scoreQuestion" class="quizQuestion"></div>
+      <div id="scoreSymbol" class="scoreSymbol"></div>
+      <div id="scoreChoices" class="scoreQuizChoices"></div>
+      <div id="scoreExplain" class="scoreExplain hidden"></div>
+      <button id="scoreNextBtn" class="quizNext hidden">次の問題へ →</button>
+      <div class="scoreLegend">早稲田式の代表的な記号を中心に出題します。団体・スコアブックにより一部記号が異なる場合があります。</div>
+    </section>
+
     <section id="progressCard" class="card progressCard">
       <div class="row"><strong>進捗</strong><span class="sub" id="progressText"></span></div>
       <div class="bar" style="margin-top:8px"><div id="progress" style="width:0%"></div></div>
@@ -301,7 +338,7 @@ padding:12px 16px;border-radius:13px;font-weight:800;text-align:center;backdrop-
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const names={
   course:'コース判定',pitch:'球種判定',flash:'瞬間視',select:'選球眼',
-  reaction:'反応速度',numbers:'数字タップ',rules:'野球ルールクイズ'
+  reaction:'反応速度',numbers:'数字タップ',rules:'野球ルールクイズ',score:'スコア記号クイズ'
 };
 const descs={
   course:'球の到達位置を見て9分割のコースを判断します。',
@@ -310,13 +347,14 @@ const descs={
   select:'ストライク／ボールを見極めて「打つ」「見逃す」を判断します。',
   reaction:'合図が出たらできるだけ速くタップします。',
   numbers:'数字を順番に探してタップします。',
-  rules:'野球ルールを○×・選択問題で確認します。'
+  rules:'野球ルールを○×・選択問題で確認します。',
+  score:'早稲田式スコアの記号を見て意味を読み取る練習です。'
 };
 const S={
   mode:'course',speed:120,batter:'left',difficulty:null,running:false,round:0,
   answer:null,startTs:0,streak:0,bestStreak:0,ready:false,timer:null,
   totalPoints:0,numberNext:1,numberStart:0,numberTimer:null,numberFlashTimer:null,
-  numberMax:9,quizQuestions:[],quizIndex:0,quizCorrect:0,quizLocked:false
+  numberMax:9,quizQuestions:[],quizIndex:0,quizCorrect:0,quizLocked:false,scoreQuestions:[],scoreIndex:0,scoreCorrect:0,scoreLocked:false
 };
 
 const courseLabels={'1':'左上','2':'上','3':'右上','4':'左','5':'中央','6':'右','7':'左下','8':'下','9':'右下'};
@@ -371,7 +409,7 @@ function goTop(){
   showScreen('screenTop');
 }
 function stopAll(){
-  S.running=false;S.ready=false;S.quizLocked=true;
+  S.running=false;S.ready=false;S.quizLocked=true;S.scoreLocked=true;
   clearTimeout(S.timer);clearInterval(S.numberTimer);clearTimeout(S.numberFlashTimer);
   resetBall();
 }
@@ -404,6 +442,13 @@ function openSettings(mode){
       <button data-diff="advanced">🔥 上級</button>
       <button data-diff="boys">🏆 ボーイズ実戦</button>`;
     S.difficulty='beginner';
+  }else if(mode==='score'){
+    diff.classList.remove('hidden');
+    btns.innerHTML=`
+      <button data-diff="beginner">🌱 初級<br><span class="sub">記号→意味</span></button>
+      <button data-diff="intermediate">⚾ 中級<br><span class="sub">意味→記号</span></button>
+      <button data-diff="advanced">🔥 上級<br><span class="sub">実戦読み取り</span></button>`;
+    S.difficulty='beginner';
   }else if(mode==='flash'||mode==='reaction'){
     diff.classList.remove('hidden');
     btns.innerHTML=`
@@ -426,14 +471,16 @@ function startTraining(){
   S.running=true;S.round=0;S.streak=0;S.answer=null;S.quizLocked=false;
   $('#trainingTitle').textContent=names[S.mode];
   $('#trainingMeta').textContent=buildMeta();
-  $('#visualTrainingCard').classList.toggle('hidden',['numbers','rules'].includes(S.mode));
+  $('#visualTrainingCard').classList.toggle('hidden',['numbers','rules','score'].includes(S.mode));
   $('#numberTrainingCard').classList.toggle('hidden',S.mode!=='numbers');
   $('#rulesTrainingCard').classList.toggle('hidden',S.mode!=='rules');
+  $('#scoreTrainingCard').classList.toggle('hidden',S.mode!=='score');
   $('#progressCard').classList.toggle('hidden',['numbers'].includes(S.mode));
   showScreen('screenTraining');
 
   if(S.mode==='numbers')startNumbers();
   else if(S.mode==='rules')startRules();
+  else if(S.mode==='score')startScoreQuiz();
   else nextVisual();
 }
 function buildMeta(){
@@ -443,6 +490,9 @@ function buildMeta(){
   }
   if(S.mode==='rules'){
     const m={beginner:'初級',intermediate:'中級',advanced:'上級',boys:'ボーイズ実戦'};return m[S.difficulty];
+  }
+  if(S.mode==='score'){
+    const m={beginner:'初級 記号→意味',intermediate:'中級 意味→記号',advanced:'上級 実戦読み取り'};return m[S.difficulty];
   }
   const m={easy:'初級',normal:'中級',hard:'上級'};return m[S.difficulty]||'';
 }
@@ -741,6 +791,113 @@ function finishRules(){
   finishGeneric('ルールクイズ終了！',t);
 }
 
+
+/* SCOREBOOK QUIZ */
+const SCORE_ITEMS=[
+ {symbol:'Ⅰ',label:'1アウト',type:'text',ex:'中央のローマ数字Ⅰは、そのプレーで1アウト目になったことを示します。'},
+ {symbol:'Ⅱ',label:'2アウト',type:'text',ex:'中央のローマ数字Ⅱは2アウト目を示します。'},
+ {symbol:'Ⅲ',label:'3アウト',type:'text',ex:'中央のローマ数字Ⅲは3アウト目を示します。'},
+ {symbol:'ℓ',label:'残塁',type:'text',ex:'ℓは残塁を表す代表的な記号です。'},
+ {symbol:'S',label:'盗塁',type:'text',ex:'Sは盗塁（Stolen Base）を表します。'},
+ {symbol:'CS',label:'盗塁死',type:'text',ex:'CSはCaught Stealing、盗塁死です。'},
+ {symbol:'W',label:'暴投',type:'text',ex:'Wはワイルドピッチ（暴投）を表します。'},
+ {symbol:'P',label:'捕逸',type:'text',ex:'Pはパスボール（捕逸）を表します。'},
+ {symbol:'BK',label:'ボーク',type:'text',ex:'BKはボークを表します。'},
+ {symbol:'Fc',label:'野手選択',type:'text',ex:'FcはFielder’s Choice、野手選択です。'},
+ {symbol:'DP',label:'併殺',type:'text',ex:'DPはDouble Play、併殺を表します。'},
+ {symbol:'A',label:'一塁',type:'text',ex:'早稲田式ではベースをA=一塁、B=二塁、C=三塁、D=本塁と表します。'},
+ {symbol:'B',label:'二塁',type:'text',ex:'Bは二塁を表します。'},
+ {symbol:'C',label:'三塁',type:'text',ex:'Cは三塁を表します。'},
+ {symbol:'D',label:'本塁',type:'text',ex:'Dは本塁を表します。'},
+ {symbol:'1-3',label:'投手→一塁手でアウト',type:'text',ex:'守備番号1は投手、3は一塁手。1-3は投手が処理して一塁手へ送球してアウトにした形です。'},
+ {symbol:'3A',label:'一塁手が自ら一塁を踏んでアウト',type:'text',ex:'3は一塁手、Aは一塁。3Aは一塁手が自分で一塁ベースを踏んだ記録です。'}
+];
+
+const FIELD_NUMBERS=[
+ ['1','投手'],['2','捕手'],['3','一塁手'],['4','二塁手'],['5','三塁手'],['6','遊撃手'],['7','左翼手'],['8','中堅手'],['9','右翼手']
+];
+
+function scoreVisual(item){
+  if(item.type==='runEarned')return `<div class="scoreDiamond"><div class="scoreRunDot"></div></div><div class="scoreSymbolSub">得点</div>`;
+  if(item.type==='runUnearned')return `<div class="scoreDiamond"><div class="scoreRunRing"></div></div><div class="scoreSymbolSub">得点</div>`;
+  return `<div class="scoreSymbolText">${item.symbol}</div>`;
+}
+function scorePool(){
+  let p=[...SCORE_ITEMS];
+  FIELD_NUMBERS.forEach(([n,pos])=>p.push({symbol:n,label:pos,type:'field',ex:`守備番号${n}は${pos}です。`}));
+  return p;
+}
+function startScoreQuiz(){
+  const pool=scorePool();
+  S.scoreQuestions=shuffleArray(pool).slice(0,10);
+  S.scoreIndex=0;S.scoreCorrect=0;S.scoreLocked=false;
+  renderScoreQuestion();
+}
+function renderScoreQuestion(){
+  if(S.scoreIndex>=10){finishScoreQuiz();return}
+  const item=S.scoreQuestions[S.scoreIndex];
+  $('#scoreLevelName').textContent=buildMeta();
+  $('#scoreNo').textContent=S.scoreIndex+1;
+  $('#scoreCorrect').textContent=S.scoreCorrect;
+  $('#scoreExplain').classList.add('hidden');
+  $('#scoreNextBtn').classList.add('hidden');
+  $('#trainingCounter').textContent=(S.scoreIndex+1)+'/10';
+  $('#progressText').textContent=(S.scoreIndex+1)+'/10';
+  $('#progress').style.width=((S.scoreIndex+1)/10*100)+'%';
+
+  let choices=[];
+  if(S.difficulty==='beginner'){
+    $('#scoreQuestion').textContent='この記号の意味は？';
+    $('#scoreSymbol').classList.remove('hidden');
+    $('#scoreSymbol').innerHTML=scoreVisual(item);
+    const wrong=shuffleArray(scorePool().filter(x=>x.label!==item.label)).slice(0,3).map(x=>x.label);
+    choices=shuffleArray([item.label,...wrong]);
+  }else if(S.difficulty==='intermediate'){
+    $('#scoreQuestion').textContent=`「${item.label}」を表す記号はどれ？`;
+    $('#scoreSymbol').classList.add('hidden');
+    const wrong=shuffleArray(scorePool().filter(x=>x.symbol!==item.symbol)).slice(0,3).map(x=>x.symbol);
+    choices=shuffleArray([item.symbol,...wrong]);
+  }else{
+    $('#scoreQuestion').textContent=item.symbol==='1-3'
+      ?'スコアに「1-3」とあります。プレー内容として正しいのは？'
+      :item.symbol==='3A'
+      ?'スコアに「3A」とあります。プレー内容として正しいのは？'
+      :`この記号「${item.symbol}」を実戦で見たときの意味は？`;
+    $('#scoreSymbol').classList.remove('hidden');
+    $('#scoreSymbol').innerHTML=scoreVisual(item);
+    const wrong=shuffleArray(scorePool().filter(x=>x.label!==item.label)).slice(0,3).map(x=>x.label);
+    choices=shuffleArray([item.label,...wrong]);
+  }
+  $('#scoreChoices').innerHTML=choices.map(c=>`<button data-score="${c.replace(/"/g,'&quot;')}">${c}</button>`).join('');
+  S.scoreAnswer=S.difficulty==='intermediate'?item.symbol:item.label;
+  S.scoreCurrent=item;
+  S.scoreLocked=false;
+}
+function answerScore(val){
+  if(!S.running||S.mode!=='score'||S.scoreLocked)return;
+  S.scoreLocked=true;
+  const ok=String(val)===String(S.scoreAnswer);
+  if(ok){S.scoreCorrect++;addPoints(20)}
+  $('#scoreCorrect').textContent=S.scoreCorrect;
+  $('#scoreExplain').classList.remove('hidden');
+  $('#scoreExplain').textContent=(ok?'○ 正解！ +20pt':'× 不正解\n正解：'+S.scoreAnswer)+'\n'+S.scoreCurrent.ex;
+  $('#scoreExplain').style.whiteSpace='pre-line';
+  $('#scoreNextBtn').classList.remove('hidden');
+}
+function nextScoreQuestion(){
+  if(!S.running||S.mode!=='score')return;
+  S.scoreIndex++;
+  renderScoreQuestion();
+}
+function finishScoreQuiz(){
+  let bonus=S.scoreCorrect===10?100:S.scoreCorrect>=8?50:0;
+  if(bonus)addPoints(bonus);
+  let t=`10問中 ${S.scoreCorrect}問正解`;
+  if(bonus)t+=`\nボーナス +${bonus}pt`;
+  if(S.scoreCorrect===10)t+='\n🏆 SCORE MASTER！';
+  finishGeneric('スコア記号クイズ終了！',t);
+}
+
 function finishGeneric(title,text){
   stopAll();
   $('#resultTitle').textContent=title;
@@ -774,8 +931,11 @@ document.body.addEventListener('click',e=>{
   if(n)numberTap(n);
   const q=e.target.closest('[data-quiz]');
   if(q)answerRule(q.dataset.quiz);
+  const s=e.target.closest('[data-score]');
+  if(s)answerScore(s.dataset.score);
 });
 $('#quizNextBtn').addEventListener('click',nextRuleQuestion);
+$('#scoreNextBtn').addEventListener('click',nextScoreQuestion);
 
 loadPoints();
 
