@@ -125,7 +125,7 @@ padding:12px 16px;border-radius:13px;font-weight:800;text-align:center;backdrop-
   <section id="screenTop" class="screen active">
     <div class="topHeader">
       <h1>⚾ 野球ビジョントレーナー</h1>
-      <div class="sub">視覚・反応・判断・ルール　<span class="version">v1.1</span></div>
+      <div class="sub">視覚・反応・判断・ルール　<span class="version">v1.2</span></div>
     </div>
 
     <section class="card">
@@ -501,8 +501,14 @@ function pitch(){
 function flash(){
   showAnswerPanel('flashAns');
   const vals=['3','6','8','9','12','15'];
-  const v=vals[Math.floor(Math.random()*vals.length)];S.answer=v;
-  $('#flashAns').innerHTML=shuffleArray(vals).slice(0,3).map(x=>`<button data-answer="${x}">${x}</button>`).join('');
+  const v=vals[Math.floor(Math.random()*vals.length)];
+  S.answer=v;
+
+  // 正解は必ず候補に入れ、不正解を2つ追加する
+  const distractors=shuffleArray(vals.filter(x=>x!==v)).slice(0,2);
+  const choices=shuffleArray([v,...distractors]);
+  $('#flashAns').innerHTML=choices.map(x=>`<button data-answer="${x}">${x}</button>`).join('');
+
   animate(0,235,v);
   const showMs=S.difficulty==='easy'?650:S.difficulty==='hard'?250:400;
   S.timer=setTimeout(()=>$('#ball').classList.add('hidden'),showMs);
