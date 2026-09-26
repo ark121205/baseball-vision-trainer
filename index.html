@@ -55,7 +55,7 @@ th{color:#bcd0ef}.bar{height:8px;background:#08172e;border-radius:8px;overflow:h
 <body>
 <div class="app">
   <h1>⚾ 野球ビジョントレーナー</h1>
-  <div class="sub">動体視力・瞬間視・選球眼・反応速度　<span style="opacity:.65">v0.3</span></div>
+  <div class="sub">動体視力・瞬間視・選球眼・反応速度　<span style="opacity:.65">v0.4</span></div>
 
   <section class="card statgrid">
     <div class="stat"><b id="todayCount">0</b><span>今日</span></div>
@@ -180,7 +180,6 @@ function duration(){return Math.max(300,1350-(S.speed-80)*14)}
 function coursePos(i){
   const arena=$('#arena').getBoundingClientRect();
   const zone=document.querySelector('.zone').getBoundingClientRect();
-  const ball=$('#ball').getBoundingClientRect();
 
   const col=(i-1)%3;
   const row=Math.floor((i-1)/3);
@@ -188,15 +187,19 @@ function coursePos(i){
   const cellW=zone.width/3;
   const cellH=zone.height/3;
 
+  // Target: exact center of the chosen 3x3 cell.
   const targetCenterX=(zone.left-arena.left)+(col+0.5)*cellW;
   const targetCenterY=(zone.top-arena.top)+(row+0.5)*cellH;
 
-  const startCenterX=(ball.left-arena.left)+ball.width/2;
-  const startCenterY=(ball.top-arena.top)+ball.height/2;
+  // Ball's CSS start position is always:
+  // left: 50% - 18px, top: 54px, size: 36px.
+  // Therefore its start center is arena center X and Y=72px.
+  const startCenterX=arena.width/2;
+  const startCenterY=72;
 
   return {
-    x: targetCenterX-startCenterX,
-    y: targetCenterY-startCenterY
+    x:targetCenterX-startCenterX,
+    y:targetCenterY-startCenterY
   };
 }
 function animate(x,y,letter=''){let b=$('#ball');b.classList.remove('hidden');b.textContent=letter;b.style.transition='none';b.style.transform='translate(0,0) scale(.5)';
@@ -210,7 +213,7 @@ function feedback(ok,rt,correctValue){
   $('#msg').textContent=ok?'○ 正解':'× 不正解\n正解：'+answerLabel(S.mode,correctValue);
   $('#msg').style.whiteSpace='pre-line';
   show(null);
-  setTimeout(next,900);
+  setTimeout(next,1100);
 }
 function updateProgress(){$('#setCount').textContent=S.round;$('#progress').style.width=Math.min(100,S.round/30*100)+'%'}
 function next(){
@@ -245,9 +248,8 @@ function select(){
   }else{
     const arena=$('#arena').getBoundingClientRect();
     const zone=document.querySelector('.zone').getBoundingClientRect();
-    const ball=$('#ball').getBoundingClientRect();
-    const startCenterX=(ball.left-arena.left)+ball.width/2;
-    const startCenterY=(ball.top-arena.top)+ball.height/2;
+    const startCenterX=arena.width/2;
+    const startCenterY=72;
 
     const candidates=[
       {cx:(zone.left-arena.left)-28, cy:(zone.top-arena.top)+zone.height*.25},
