@@ -16,22 +16,60 @@
   --blue:#64baff;--good:#42d18b;--bad:#ff6f82;--line:rgba(255,255,255,.12)
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;background:linear-gradient(180deg,#061023,#0b1833);color:var(--text);
-font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
-.app{max-width:760px;margin:auto;padding:calc(12px + env(safe-area-inset-top)) 14px calc(20px + env(safe-area-inset-bottom))}
-h1{font-size:24px;margin:6px 0}.sub{font-size:12px;color:var(--muted)}
+body{
+  margin:0;background:linear-gradient(180deg,#061023,#0b1833);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh
+}
+.app{max-width:760px;margin:auto;padding:calc(12px + env(safe-area-inset-top)) 14px calc(22px + env(safe-area-inset-bottom))}
+h1{font-size:24px;margin:6px 0}
+h2{font-size:21px;margin:0}
+.sub{font-size:12px;color:var(--muted)}
 .card{background:rgba(16,35,71,.97);border:1px solid var(--line);border-radius:20px;padding:15px;margin:12px 0}
 .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.statgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
-.stat{background:#0b1a36;border-radius:13px;padding:9px 5px;text-align:center}
-.stat b{display:block;font-size:18px}.stat span{font-size:10px;color:var(--muted)}
-button{border:0;border-radius:14px;padding:12px 10px;background:#1a3e78;color:white;font-weight:700;font-size:15px}
-button:active{transform:scale(.985)}button.primary{background:linear-gradient(135deg,#2797ea,#71c5ff);color:#04152b}
+button{border:0;border-radius:14px;padding:13px 10px;background:#1a3e78;color:white;font-weight:800;font-size:15px}
+button:active{transform:scale(.985)}
+button.primary{background:linear-gradient(135deg,#2797ea,#71c5ff);color:#04152b}
 button.ghost{background:#0b1a36;color:#cfe4ff}
-button.good{background:#135b3d}button.bad{background:#6b2732}
-.seg{display:flex;gap:7px;flex-wrap:wrap}.seg button{flex:1 1 auto;font-size:12px;padding:10px 7px}
+button.good{background:#135b3d}
+button.bad{background:#6b2732}
+.hidden{display:none!important}
+
+.screen{display:none}
+.screen.active{display:block}
+
+.topHeader{margin-bottom:10px}
+.version{opacity:.65}
+.heroPoints{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.rankPanel{margin-top:10px;padding:10px;border-radius:14px;background:#0b1a36}
+.rankTop{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:7px}
+.rankBadge{font-size:17px;font-weight:900}
+.rankBar{height:9px;background:#1a2a48;border-radius:999px;overflow:hidden}
+.rankBar>div{height:100%;width:0%;background:linear-gradient(90deg,#9fb4d9,#f4d35e);transition:width .35s ease}
+
+.menuGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.menuCard{
+  min-height:112px;text-align:left;padding:14px;border-radius:18px;
+  background:linear-gradient(180deg,#173967,#10274c);border:1px solid var(--line)
+}
+.menuCard .icon{font-size:28px;display:block;margin-bottom:7px}
+.menuCard strong{font-size:16px;display:block}
+.menuCard span{font-size:11px;color:#b9cbea;line-height:1.4;display:block;margin-top:5px}
+
+.backRow{display:flex;gap:8px;margin-bottom:10px}
+.backRow button{flex:1}
+.settingBlock{margin-top:14px}
+.settingTitle{font-size:13px;color:#cfe1ff;margin-bottom:8px}
+.seg{display:flex;gap:7px;flex-wrap:wrap}
+.seg button{flex:1 1 auto;font-size:13px;padding:11px 8px}
 .seg .active{outline:2px solid var(--blue);background:#24569b}
 input[type=range]{width:100%}
+.startBig{width:100%;font-size:18px;padding:16px;margin-top:16px}
+
+.trainingTop{display:flex;gap:8px;position:sticky;top:calc(env(safe-area-inset-top) + 6px);z-index:20;background:#08142c;padding:6px 0}
+.trainingTop button{flex:1}
+.trainingTitle{font-size:16px;font-weight:900}
+.trainingMeta{font-size:12px;color:var(--muted)}
+
 .arena{height:430px;position:relative;overflow:hidden;border-radius:22px;background:
 radial-gradient(circle at 50% 10%,#28507a 0,#102a52 28%,#09192f 62%,#061123 100%);border:1px solid var(--line)}
 .mound{position:absolute;left:50%;top:18%;transform:translateX(-50%);width:27px;height:8px;background:#b8aa85;border-radius:50%}
@@ -44,41 +82,11 @@ clip-path:polygon(0 0,100% 0,86% 64%,50% 100%,14% 64%)}
 color:#0a1426;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;
 box-shadow:0 0 0 2px #d9d9d9 inset,0 0 15px rgba(255,255,255,.45);z-index:5}
 .msg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:8;background:rgba(0,0,0,.58);
-padding:12px 16px;border-radius:13px;font-weight:800;text-align:center;backdrop-filter:blur(4px)}
-.hidden{display:none!important}.answers{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:11px}
-.answers button{font-size:13px;padding:11px 4px}.answers.two{grid-template-columns:1fr 1fr}
-.note{font-size:11px;line-height:1.55;color:var(--muted)}
-table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:7px 3px;border-bottom:1px solid var(--line);text-align:center}
-th{color:#bcd0ef}.bar{height:8px;background:#08172e;border-radius:8px;overflow:hidden}.bar>div{height:100%;background:#5ab9ff}
+padding:12px 16px;border-radius:13px;font-weight:800;text-align:center;backdrop-filter:blur(4px);white-space:pre-line}
+.answers{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:11px}
+.answers button{font-size:13px;padding:11px 4px}
+.answers.two{grid-template-columns:1fr 1fr}
 
-.celebrate{font-size:22px;font-weight:900;line-height:1.45}
-
-
-.rankPanel{margin-top:12px;padding:12px;border-radius:14px;background:#0b1a36}
-.rankTop{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
-.rankBadge{font-size:18px;font-weight:900}
-.rankBar{height:10px;background:#1a2a48;border-radius:999px;overflow:hidden}
-.rankBar>div{height:100%;width:0%;background:linear-gradient(90deg,#9fb4d9,#f4d35e);transition:width .35s ease}
-
-
-.quizBox{margin-top:12px}
-.quizQuestion{padding:14px;border-radius:14px;background:#0b1a36;font-size:18px;font-weight:800;line-height:1.55}
-.quizMeta{display:flex;justify-content:space-between;align-items:center;margin:10px 2px;color:#cfe1ff;font-size:13px}
-.quizChoices{display:grid;gap:10px}
-.quizChoices.two{grid-template-columns:1fr 1fr}
-.quizChoices.three{grid-template-columns:1fr}
-.quizChoices button{min-height:54px;font-size:17px;font-weight:800}
-.quizExplain{margin-top:10px;padding:12px;border-radius:12px;background:#102446;line-height:1.5}
-
-
-.quizLevels{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
-.quizLevels button{min-height:50px;font-weight:900}
-.quizLevels .selected{outline:3px solid #f4d35e}
-.quizSource{margin-top:10px;font-size:11px;line-height:1.45;color:#91a8cf}
-
-
-.numberLevelBox{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
-.numberLevelBox button{min-height:48px;font-weight:900}
 .numberGrid{display:grid;gap:8px;margin-top:12px}
 .numberGrid.grid3{grid-template-columns:repeat(3,1fr)}
 .numberGrid.grid4{grid-template-columns:repeat(4,1fr)}
@@ -93,187 +101,225 @@ th{color:#bcd0ef}.bar{height:8px;background:#08172e;border-radius:8px;overflow:h
 .numberInfo{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:14px;color:#cfe1ff}
 .bestBox{margin-top:10px;padding:10px;border-radius:12px;background:#0b1a36;text-align:center;font-weight:800}
 .numberHelp{margin-top:8px;font-size:12px;color:#9db1d5;line-height:1.5}
-.quizNext{width:100%;margin-top:10px;background:linear-gradient(135deg,#2797ea,#71c5ff);color:#04152b;font-weight:900}
 
+.quizQuestion{padding:14px;border-radius:14px;background:#0b1a36;font-size:18px;font-weight:800;line-height:1.55}
+.quizMeta{display:flex;justify-content:space-between;align-items:center;margin:10px 2px;color:#cfe1ff;font-size:13px}
+.quizChoices{display:grid;gap:10px;margin-top:10px}
+.quizChoices.two{grid-template-columns:1fr 1fr}
+.quizChoices.three{grid-template-columns:1fr}
+.quizChoices button{min-height:54px;font-size:17px;font-weight:800}
+.quizExplain{margin-top:10px;padding:12px;border-radius:12px;background:#102446;line-height:1.55}
+.quizNext{width:100%;margin-top:10px;background:linear-gradient(135deg,#2797ea,#71c5ff);color:#04152b;font-weight:900}
+.progressCard{margin-top:10px}
+.bar{height:8px;background:#08172e;border-radius:8px;overflow:hidden}
+.bar>div{height:100%;background:#5ab9ff}
+.resultBox{text-align:center;padding:22px 12px}
+.resultBox .big{font-size:28px;font-weight:900;margin-bottom:8px}
+.resultBox button{width:100%;margin-top:10px}
 </style>
 </head>
 <body>
 <div class="app">
-  <h1>⚾ 野球ビジョントレーナー</h1>
-  <div class="sub">動体視力・瞬間視・選球眼・反応速度　<span style="opacity:.65">v1.0</span></div>
 
-<section class="card">
-  <div class="row">
-    <div>
-      <strong>🏆 TOTAL POINTS</strong>
-      <div class="sub">トレーニングで貯まるポイント</div>
+  <!-- TOP -->
+  <section id="screenTop" class="screen active">
+    <div class="topHeader">
+      <h1>⚾ 野球ビジョントレーナー</h1>
+      <div class="sub">視覚・反応・判断・ルール　<span class="version">v1.1</span></div>
     </div>
-    <div style="font-size:28px;font-weight:900"><span id="totalPoints">0</span> pt</div>
-  </div>
 
-  <div class="rankPanel">
-    <div class="rankTop">
-      <span id="rankBadge" class="rankBadge">🥉 Bronze</span>
-      <span id="nextRankText" class="sub">Silverまであと500pt</span>
-    </div>
-    <div class="rankBar"><div id="rankProgress"></div></div>
-  </div>
-</section>
-
-  <section class="card statgrid">
-    <div class="stat"><b id="todayCount">0</b><span>今日</span></div>
-    <div class="stat"><b id="rate">-</b><span>正答率</span></div>
-    <div class="stat"><b id="avgRt">-</b><span>平均反応</span></div>
-    <div class="stat"><b id="bestStreak">0</b><span>連続正解</span></div>
-  </section>
-
-  <section class="card">
-    <div class="row"><strong>モード</strong><span class="sub" id="modeName">コース判定</span></div>
-    <div class="seg" style="margin-top:9px">
-      <button class="mode active" data-mode="course">コース</button>
-      <button class="mode" data-mode="pitch">球種</button>
-      <button class="mode" data-mode="flash">瞬間視</button>
-      <button class="mode" data-mode="select">選球眼</button>
-      <button class="mode" data-mode="reaction">反応</button>
-      <button class="mode" data-mode="numbers">数字タップ</button>
-      <button class="mode" data-mode="rules">ルールクイズ</button>
-    </div>
-  </section>
-
-  <section class="card">
-    <div class="row"><span>疑似球速</span><strong><span id="speedText">120</span> km/h</strong></div>
-    <input id="speed" type="range" min="80" max="150" step="5" value="120">
-    <div class="row" style="margin-top:8px">
-      <span>打席</span>
-      <div class="seg" style="width:64%">
-        <button id="leftBat" class="active">左打者</button>
-        <button id="rightBat">右打者</button>
+    <section class="card">
+      <div class="heroPoints">
+        <div>
+          <strong>🏆 TOTAL POINTS</strong>
+          <div class="sub">トレーニングで貯まるポイント</div>
+        </div>
+        <div style="font-size:28px;font-weight:900"><span id="totalPoints">0</span> pt</div>
       </div>
-    </div>
+      <div class="rankPanel">
+        <div class="rankTop">
+          <span id="rankBadge" class="rankBadge">🥉 Bronze</span>
+          <span id="nextRankText" class="sub">Silverまであと500pt</span>
+        </div>
+        <div class="rankBar"><div id="rankProgress"></div></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="row"><strong>トレーニングを選ぶ</strong><span class="sub">タップして設定へ</span></div>
+      <div class="menuGrid" style="margin-top:12px">
+        <button class="menuCard" data-menu="course"><span class="icon">🎯</span><strong>コース判定</strong><span>球が来たコースを素早く判断</span></button>
+        <button class="menuCard" data-menu="pitch"><span class="icon">⚾</span><strong>球種判定</strong><span>変化を見て球種を判断</span></button>
+        <button class="menuCard" data-menu="flash"><span class="icon">👁️</span><strong>瞬間視</strong><span>一瞬で見えた情報を判断</span></button>
+        <button class="menuCard" data-menu="select"><span class="icon">🧠</span><strong>選球眼</strong><span>打つ／見逃すを瞬時に判断</span></button>
+        <button class="menuCard" data-menu="reaction"><span class="icon">⚡</span><strong>反応速度</strong><span>光った瞬間にタップ</span></button>
+        <button class="menuCard" data-menu="numbers"><span class="icon">🔢</span><strong>数字タップ</strong><span>視野・探索・記憶を鍛える</span></button>
+        <button class="menuCard" data-menu="rules" style="grid-column:1 / -1"><span class="icon">📘</span><strong>野球ルールクイズ</strong><span>初級〜ボーイズ実戦まで</span></button>
+      </div>
+    </section>
   </section>
 
-  <section class="card">
-    <div id="arena" class="arena">
-      <div class="mound"></div>
-      <div class="zone">
-        <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+  <!-- SETTINGS -->
+  <section id="screenSettings" class="screen">
+    <div class="backRow">
+      <button id="settingsHomeBtn" class="ghost">← トップへ</button>
+    </div>
+    <section class="card">
+      <h2 id="settingsTitle">設定</h2>
+      <div id="settingsDesc" class="sub" style="margin-top:5px"></div>
+
+      <div id="speedSetting" class="settingBlock">
+        <div class="row"><span class="settingTitle">疑似球速</span><strong><span id="speedText">120</span> km/h</strong></div>
+        <input id="speed" type="range" min="80" max="150" step="5" value="120">
       </div>
-      <div class="plate"></div>
-      <div id="ball" class="ball hidden"></div>
-      <div id="msg" class="msg">「開始」を押してください</div>
-    </div>
 
-    <div id="courseAns" class="answers hidden">
-      <button data-answer="1">左上</button><button data-answer="2">上</button><button data-answer="3">右上</button>
-      <button data-answer="4">左</button><button data-answer="5">中央</button><button data-answer="6">右</button>
-      <button data-answer="7">左下</button><button data-answer="8">下</button><button data-answer="9">右下</button>
-    </div>
-
-    <div id="pitchAns" class="answers hidden">
-      <button data-answer="straight">ストレート</button>
-      <button data-answer="slider">スライダー</button>
-      <button data-answer="curve">カーブ</button>
-      <button data-answer="fork">フォーク</button>
-      <button data-answer="change">チェンジ</button>
-    </div>
-
-    <div id="flashAns" class="answers hidden"></div>
-
-    <div id="selectAns" class="answers two hidden">
-      <button class="good" data-answer="swing">打つ</button>
-      <button class="bad" data-answer="take">見逃す</button>
-    </div>
-
-    <div id="reactionAns" class="answers hidden" style="grid-template-columns:1fr">
-      <button id="reactionBtn" class="primary">光ったらタップ</button>
-    </div>
-    <div id="numbersAns" class="hidden">
-      <div id="numberLevelSelect">
-        <div class="quizQuestion">数字タップの難易度を選んでください</div>
-        <div class="numberLevelBox">
-          <button data-number-level="beginner">🌱 初級<br><span class="sub">3×3</span></button>
-          <button data-number-level="intermediate">⚾ 中級<br><span class="sub">4×4</span></button>
-          <button data-number-level="advanced">🔥 上級<br><span class="sub">5×5・瞬間表示</span></button>
+      <div id="batterSetting" class="settingBlock">
+        <div class="settingTitle">打席</div>
+        <div class="seg">
+          <button id="leftBat" class="active">左打者</button>
+          <button id="rightBat">右打者</button>
         </div>
       </div>
-      <div id="numberPlay" class="hidden">
-        <div class="numberInfo">
-          <span><strong id="numberLevelName"></strong>　次：<strong id="nextNumber">1</strong></span>
-          <span>タイム：<strong id="numberTime">0.00</strong> 秒</span>
-        </div>
-        <div id="numberGrid" class="numberGrid"></div>
-        <div class="bestBox">自己ベスト：<span id="numberBest">--</span></div>
-        <div id="numberHelp" class="numberHelp"></div>
-      </div>
-    </div>
-    <div id="rulesAns" class="hidden quizBox">
-      <div id="quizLevelSelect">
-        <div class="quizQuestion">難易度を選んでください</div>
-        <div class="quizLevels">
-          <button data-quiz-level="beginner">🌱 初級</button>
-          <button data-quiz-level="intermediate">⚾ 中級</button>
-          <button data-quiz-level="advanced">🔥 上級</button>
-          <button data-quiz-level="boys">🏆 ボーイズ実戦</button>
-        </div>
-        <div class="quizSource">ボーイズ実戦編は、日本少年野球連盟の2026年度資料・大会規定をもとに作成。</div>
+
+      <div id="difficultySetting" class="settingBlock hidden">
+        <div class="settingTitle">難易度</div>
+        <div id="difficultyButtons" class="seg"></div>
       </div>
 
-      <div id="quizPlay" class="hidden">
-        <div class="quizMeta">
-          <span><strong id="quizLevelName"></strong>　問題 <strong id="quizNo">1</strong>/10</span>
-          <span>正解 <strong id="quizCorrect">0</strong></span>
+      <button id="settingsStartBtn" class="primary startBig">この設定で開始！</button>
+    </section>
+  </section>
+
+  <!-- TRAINING -->
+  <section id="screenTraining" class="screen">
+    <div class="trainingTop">
+      <button id="stopBtn" class="bad">■ 中止</button>
+      <button id="trainingHomeBtn" class="ghost">⌂ トップへ</button>
+    </div>
+
+    <section class="card">
+      <div class="row">
+        <div>
+          <div id="trainingTitle" class="trainingTitle"></div>
+          <div id="trainingMeta" class="trainingMeta"></div>
         </div>
-        <div id="quizQuestion" class="quizQuestion"></div>
-        <div id="quizChoices" class="quizChoices"></div>
-        <div id="quizExplain" class="quizExplain hidden"></div>
-        <button id="quizNextBtn" class="quizNext hidden">次の問題へ →</button>
+        <div id="trainingCounter" class="sub"></div>
       </div>
-    </div>
+    </section>
 
-    <div class="answers two">
-      <button id="startBtn" class="primary">開始</button>
-      <button id="stopBtn" class="ghost">停止</button>
-    </div>
-    <div class="note" style="margin-top:8px">1セット30球。球速表示はトレーニング用の疑似速度です。</div>
+    <section id="visualTrainingCard" class="card">
+      <div id="arena" class="arena">
+        <div class="mound"></div>
+        <div class="zone">
+          <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+        </div>
+        <div class="plate"></div>
+        <div id="ball" class="ball hidden"></div>
+        <div id="msg" class="msg">準備中...</div>
+      </div>
+
+      <div id="courseAns" class="answers hidden">
+        <button data-answer="1">左上</button><button data-answer="2">上</button><button data-answer="3">右上</button>
+        <button data-answer="4">左</button><button data-answer="5">中央</button><button data-answer="6">右</button>
+        <button data-answer="7">左下</button><button data-answer="8">下</button><button data-answer="9">右下</button>
+      </div>
+
+      <div id="pitchAns" class="answers hidden">
+        <button data-answer="straight">ストレート</button>
+        <button data-answer="slider">スライダー</button>
+        <button data-answer="curve">カーブ</button>
+        <button data-answer="fork">フォーク</button>
+        <button data-answer="change">チェンジ</button>
+      </div>
+
+      <div id="flashAns" class="answers hidden"></div>
+
+      <div id="selectAns" class="answers two hidden">
+        <button class="good" data-answer="swing">打つ</button>
+        <button class="bad" data-answer="take">見逃す</button>
+      </div>
+
+      <div id="reactionAns" class="answers hidden" style="grid-template-columns:1fr">
+        <button id="reactionBtn" class="primary">光ったらタップ</button>
+      </div>
+    </section>
+
+    <section id="numberTrainingCard" class="card hidden">
+      <div class="numberInfo">
+        <span><strong id="numberLevelName"></strong>　次：<strong id="nextNumber">1</strong></span>
+        <span>タイム：<strong id="numberTime">0.00</strong> 秒</span>
+      </div>
+      <div id="numberGrid" class="numberGrid"></div>
+      <div class="bestBox">自己ベスト：<span id="numberBest">--</span></div>
+      <div id="numberHelp" class="numberHelp"></div>
+    </section>
+
+    <section id="rulesTrainingCard" class="card hidden">
+      <div class="quizMeta">
+        <span><strong id="quizLevelName"></strong>　問題 <strong id="quizNo">1</strong>/10</span>
+        <span>正解 <strong id="quizCorrect">0</strong></span>
+      </div>
+      <div id="quizQuestion" class="quizQuestion"></div>
+      <div id="quizChoices" class="quizChoices"></div>
+      <div id="quizExplain" class="quizExplain hidden"></div>
+      <button id="quizNextBtn" class="quizNext hidden">次の問題へ →</button>
+    </section>
+
+    <section id="progressCard" class="card progressCard">
+      <div class="row"><strong>進捗</strong><span class="sub" id="progressText"></span></div>
+      <div class="bar" style="margin-top:8px"><div id="progress" style="width:0%"></div></div>
+    </section>
   </section>
 
-  <section class="card">
-    <div class="row"><strong>今日の進捗</strong><span class="sub"><span id="setCount">0</span>/30球</span></div>
-    <div class="bar" style="margin-top:8px"><div id="progress" style="width:0%"></div></div>
+  <!-- RESULT -->
+  <section id="screenResult" class="screen">
+    <section class="card resultBox">
+      <div id="resultTitle" class="big">完了！</div>
+      <div id="resultText" style="white-space:pre-line;line-height:1.7"></div>
+      <button id="retryBtn" class="primary">もう一度</button>
+      <button id="resultHomeBtn" class="ghost">トップへ戻る</button>
+    </section>
   </section>
 
-  <section class="card">
-    <strong>最近の結果</strong>
-    <div style="overflow:auto;margin-top:7px">
-      <table>
-        <thead><tr><th>時刻</th><th>モード</th><th>結果</th><th>反応</th></tr></thead>
-        <tbody id="history"></tbody>
-      </table>
-    </div>
-    <button id="clearBtn" class="ghost" style="width:100%;margin-top:9px">今日の記録をクリア</button>
-  </section>
 </div>
 
 <script>
 (()=>{
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const names={course:'コース判定',pitch:'球種判定',flash:'瞬間視',select:'選球眼',reaction:'反応速度',numbers:'数字タップ',rules:'ルールクイズ'};
+const names={
+  course:'コース判定',pitch:'球種判定',flash:'瞬間視',select:'選球眼',
+  reaction:'反応速度',numbers:'数字タップ',rules:'野球ルールクイズ'
+};
+const descs={
+  course:'球の到達位置を見て9分割のコースを判断します。',
+  pitch:'軌道の違いを見て球種を判断します。',
+  flash:'一瞬だけ表示される情報を見抜きます。',
+  select:'ストライク／ボールを見極めて「打つ」「見逃す」を判断します。',
+  reaction:'合図が出たらできるだけ速くタップします。',
+  numbers:'数字を順番に探してタップします。',
+  rules:'野球ルールを○×・選択問題で確認します。'
+};
+const S={
+  mode:'course',speed:120,batter:'left',difficulty:null,running:false,round:0,
+  answer:null,startTs:0,streak:0,bestStreak:0,ready:false,timer:null,
+  totalPoints:0,numberNext:1,numberStart:0,numberTimer:null,numberFlashTimer:null,
+  numberMax:9,quizQuestions:[],quizIndex:0,quizCorrect:0,quizLocked:false
+};
+
 const courseLabels={'1':'左上','2':'上','3':'右上','4':'左','5':'中央','6':'右','7':'左下','8':'下','9':'右下'};
 const pitchLabels={straight:'ストレート',slider:'スライダー',curve:'カーブ',fork:'フォーク',change:'チェンジ'};
+
 function answerLabel(mode,val){
-  if(mode==='course') return courseLabels[String(val)]||String(val);
-  if(mode==='pitch') return pitchLabels[val]||String(val);
-  if(mode==='select') return val==='swing'?'打つ':'見逃す';
-  if(mode==='reaction') return 'タップ';
+  if(mode==='course')return courseLabels[String(val)]||String(val);
+  if(mode==='pitch')return pitchLabels[val]||String(val);
+  if(mode==='select')return val==='swing'?'打つ':'見逃す';
   return String(val);
 }
-const S={mode:'course',speed:120,batter:'left',running:false,round:0,answer:null,startTs:0,streak:0,bestStreak:0,ready:false,timer:null,records:[],numberNext:1,numberStart:0,numberTimer:null,numberLevel:null,numberMax:9,numberFlashTimer:null,totalPoints:0,quizQuestions:[],quizIndex:0,quizCorrect:0,quizLocked:false,quizLevel:null};
 
-function key(){let d=new Date();return 'bvt_'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function pointsKey(){return 'bvt_total_points'}
-function numberBestKey(level){return 'bvt_number_best_'+(level||S.numberLevel||'beginner')}
-function loadPoints(){S.totalPoints=Number(localStorage.getItem(pointsKey())||0);$('#totalPoints').textContent=S.totalPoints;renderRank()}
-function addPoints(n){S.totalPoints+=n;localStorage.setItem(pointsKey(),String(S.totalPoints));$('#totalPoints').textContent=S.totalPoints;renderRank()}
+function numberBestKey(level){return 'bvt_number_best_'+level}
+function loadPoints(){S.totalPoints=Number(localStorage.getItem(pointsKey())||0);renderPoints()}
+function addPoints(n){S.totalPoints+=n;localStorage.setItem(pointsKey(),String(S.totalPoints));renderPoints()}
 function getNumberBest(level){const v=Number(localStorage.getItem(numberBestKey(level))||0);return v>0?v:null}
 function setNumberBest(ms,level){localStorage.setItem(numberBestKey(level),String(ms))}
 function getRankInfo(points){
@@ -284,12 +330,11 @@ function getRankInfo(points){
     {name:'Platinum',icon:'💠',min:3000,next:5000},
     {name:'Diamond',icon:'💎',min:5000,next:null}
   ];
-  for(let i=ranks.length-1;i>=0;i--){
-    if(points>=ranks[i].min)return ranks[i];
-  }
+  for(let i=ranks.length-1;i>=0;i--)if(points>=ranks[i].min)return ranks[i];
   return ranks[0];
 }
-function renderRank(){
+function renderPoints(){
+  $('#totalPoints').textContent=S.totalPoints;
   const r=getRankInfo(S.totalPoints);
   $('#rankBadge').textContent=r.icon+' '+r.name;
   if(r.next===null){
@@ -297,454 +342,400 @@ function renderRank(){
     $('#rankProgress').style.width='100%';
   }else{
     const remain=r.next-S.totalPoints;
-    const span=r.next-r.min;
-    const pct=Math.max(0,Math.min(100,((S.totalPoints-r.min)/span)*100));
-    const nextName=getRankInfo(r.next).name;
-    $('#nextRankText').textContent=nextName+'まであと'+remain+'pt';
+    const pct=Math.max(0,Math.min(100,((S.totalPoints-r.min)/(r.next-r.min))*100));
+    $('#nextRankText').textContent=getRankInfo(r.next).name+'まであと'+remain+'pt';
     $('#rankProgress').style.width=pct+'%';
   }
 }
 
-
-function load(){try{S.records=JSON.parse(localStorage.getItem(key())||'[]')}catch(e){S.records=[]}loadPoints();renderStats()}
-function save(){localStorage.setItem(key(),JSON.stringify(S.records));renderStats()}
-function renderStats(){
-  $('#todayCount').textContent=S.records.length;
-  const answered=S.records.filter(r=>r.correct!==null), ok=answered.filter(r=>r.correct).length;
-  $('#rate').textContent=answered.length?Math.round(ok/answered.length*100)+'%':'-';
-  const rts=S.records.filter(r=>r.rt!=null).map(r=>r.rt);
-  $('#avgRt').textContent=rts.length?Math.round(rts.reduce((a,b)=>a+b,0)/rts.length)+'ms':'-';
-  $('#bestStreak').textContent=Math.max(S.bestStreak, ...S.records.map(r=>r.streak||0),0);
-  $('#history').innerHTML=S.records.slice(-10).reverse().map(r=>`<tr><td>${r.time}</td><td>${names[r.mode]}</td><td>${r.correct===null?'—':r.correct?'○':'×'}</td><td>${r.rt==null?'—':Math.round(r.rt)+'ms'}</td></tr>`).join('');
+function showScreen(id){
+  $$('.screen').forEach(s=>s.classList.remove('active'));
+  $('#'+id).classList.add('active');
+  window.scrollTo({top:0,behavior:'instant'});
 }
-function show(id){['courseAns','pitchAns','flashAns','selectAns','reactionAns','numbersAns','rulesAns'].forEach(x=>$('#'+x).classList.add('hidden')); if(id)$('#'+id).classList.remove('hidden')}
-function resetBall(){let b=$('#ball');b.classList.add('hidden');b.style.transition='none';b.style.transform='translate(0,0) scale(.55)';b.textContent=''}
-function duration(){return Math.max(300,1350-(S.speed-80)*14)}
+function goTop(){
+  stopAll();
+  showScreen('screenTop');
+}
+function stopAll(){
+  S.running=false;S.ready=false;S.quizLocked=true;
+  clearTimeout(S.timer);clearInterval(S.numberTimer);clearTimeout(S.numberFlashTimer);
+  resetBall();
+}
+function openSettings(mode){
+  stopAll();
+  S.mode=mode;
+  S.difficulty=null;
+  $('#settingsTitle').textContent=names[mode];
+  $('#settingsDesc').textContent=descs[mode];
+
+  const usesSpeed=['course','pitch','select'].includes(mode);
+  const usesBatter=['course','pitch','select'].includes(mode);
+  $('#speedSetting').classList.toggle('hidden',!usesSpeed);
+  $('#batterSetting').classList.toggle('hidden',!usesBatter);
+
+  const diff=$('#difficultySetting');
+  const btns=$('#difficultyButtons');
+  if(mode==='numbers'){
+    diff.classList.remove('hidden');
+    btns.innerHTML=`
+      <button data-diff="beginner">🌱 初級<br><span class="sub">3×3</span></button>
+      <button data-diff="intermediate">⚾ 中級<br><span class="sub">4×4</span></button>
+      <button data-diff="advanced">🔥 上級<br><span class="sub">5×5・瞬間表示</span></button>`;
+    S.difficulty='beginner';
+  }else if(mode==='rules'){
+    diff.classList.remove('hidden');
+    btns.innerHTML=`
+      <button data-diff="beginner">🌱 初級</button>
+      <button data-diff="intermediate">⚾ 中級</button>
+      <button data-diff="advanced">🔥 上級</button>
+      <button data-diff="boys">🏆 ボーイズ実戦</button>`;
+    S.difficulty='beginner';
+  }else if(mode==='flash'||mode==='reaction'){
+    diff.classList.remove('hidden');
+    btns.innerHTML=`
+      <button data-diff="easy">🌱 初級</button>
+      <button data-diff="normal">⚾ 中級</button>
+      <button data-diff="hard">🔥 上級</button>`;
+    S.difficulty='normal';
+  }else{
+    diff.classList.add('hidden');
+  }
+  highlightDifficulty();
+  showScreen('screenSettings');
+}
+function highlightDifficulty(){
+  $$('#difficultyButtons [data-diff]').forEach(b=>b.classList.toggle('active',b.dataset.diff===S.difficulty));
+}
+
+function startTraining(){
+  stopAll();
+  S.running=true;S.round=0;S.streak=0;S.answer=null;S.quizLocked=false;
+  $('#trainingTitle').textContent=names[S.mode];
+  $('#trainingMeta').textContent=buildMeta();
+  $('#visualTrainingCard').classList.toggle('hidden',['numbers','rules'].includes(S.mode));
+  $('#numberTrainingCard').classList.toggle('hidden',S.mode!=='numbers');
+  $('#rulesTrainingCard').classList.toggle('hidden',S.mode!=='rules');
+  $('#progressCard').classList.toggle('hidden',['numbers'].includes(S.mode));
+  showScreen('screenTraining');
+
+  if(S.mode==='numbers')startNumbers();
+  else if(S.mode==='rules')startRules();
+  else nextVisual();
+}
+function buildMeta(){
+  if(['course','pitch','select'].includes(S.mode))return `${S.speed}km/h・${S.batter==='left'?'左打者':'右打者'}`;
+  if(S.mode==='numbers'){
+    return S.difficulty==='beginner'?'初級 3×3':S.difficulty==='intermediate'?'中級 4×4':'上級 5×5・瞬間表示';
+  }
+  if(S.mode==='rules'){
+    const m={beginner:'初級',intermediate:'中級',advanced:'上級',boys:'ボーイズ実戦'};return m[S.difficulty];
+  }
+  const m={easy:'初級',normal:'中級',hard:'上級'};return m[S.difficulty]||'';
+}
+
+function updateVisualProgress(){
+  $('#trainingCounter').textContent=S.round+'/30';
+  $('#progressText').textContent=S.round+'/30';
+  $('#progress').style.width=(S.round/30*100)+'%';
+}
+function resetBall(){
+  const b=$('#ball'); if(!b)return;
+  b.classList.add('hidden');b.style.transition='none';b.style.transform='translate(0,0) scale(.55)';b.textContent='';
+}
+function duration(){
+  let d=Math.max(300,1350-(S.speed-80)*14);
+  if(S.mode==='flash'){
+    if(S.difficulty==='easy')d=850;
+    if(S.difficulty==='normal')d=600;
+    if(S.difficulty==='hard')d=380;
+  }
+  return d;
+}
 function coursePos(i){
   const arena=$('#arena').getBoundingClientRect();
   const zone=document.querySelector('.zone').getBoundingClientRect();
-
-  const col=(i-1)%3;
-  const row=Math.floor((i-1)/3);
-
-  const cellW=zone.width/3;
-  const cellH=zone.height/3;
-
-  // Target: exact center of the chosen 3x3 cell.
-  const targetCenterX=(zone.left-arena.left)+(col+0.5)*cellW;
-  const targetCenterY=(zone.top-arena.top)+(row+0.5)*cellH;
-
-  // Ball's CSS start position is always:
-  // left: 50% - 18px, top: 54px, size: 36px.
-  // Therefore its start center is arena center X and Y=72px.
-  const startCenterX=arena.width/2;
-  const startCenterY=72;
-
-  return {
-    x:targetCenterX-startCenterX,
-    y:targetCenterY-startCenterY
-  };
+  const col=(i-1)%3,row=Math.floor((i-1)/3);
+  const targetCenterX=(zone.left-arena.left)+(col+.5)*(zone.width/3);
+  const targetCenterY=(zone.top-arena.top)+(row+.5)*(zone.height/3);
+  return {x:targetCenterX-arena.width/2,y:targetCenterY-72};
 }
-function animate(x,y,letter=''){let b=$('#ball');b.classList.remove('hidden');b.textContent=letter;b.style.transition='none';b.style.transform='translate(0,0) scale(.5)';
-requestAnimationFrame(()=>requestAnimationFrame(()=>{b.style.transition=`transform ${duration()}ms cubic-bezier(.18,.72,.22,1)`;b.style.transform=`translate(${x}px,${y}px) scale(1.08)`}))}
-function feedback(ok,rt,correctValue){
-  S.streak=ok?S.streak+1:0;
-  S.bestStreak=Math.max(S.bestStreak,S.streak);
-  let pts=0;
-  if(ok){pts+=10;if(S.streak>0 && S.streak%5===0)pts+=20;addPoints(pts)}
-  S.records.push({time:new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}),mode:S.mode,correct:ok,rt,streak:S.streak});
-  save();
-  $('#msg').classList.remove('hidden');
-  $('#msg').textContent=ok?('○ 正解\n+'+pts+' pt'):('× 不正解\n正解：'+answerLabel(S.mode,correctValue));
-  $('#msg').style.whiteSpace='pre-line';
-  show(null);
-  setTimeout(next,1100);
+function animate(x,y,txt=''){
+  const b=$('#ball');b.textContent=txt;b.classList.remove('hidden');
+  requestAnimationFrame(()=>{b.style.transition=`transform ${duration()}ms linear`;b.style.transform=`translate(${x}px,${y}px) scale(1)`});
 }
-function updateProgress(){$('#setCount').textContent=S.round;$('#progress').style.width=Math.min(100,S.round/30*100)+'%'}
-function next(){
+function showAnswerPanel(id){
+  ['courseAns','pitchAns','flashAns','selectAns','reactionAns'].forEach(x=>$('#'+x).classList.add('hidden'));
+  if(id)$('#'+id).classList.remove('hidden');
+}
+function nextVisual(){
   if(!S.running)return;
-  if(S.mode==='numbers'){
-    $('#msg').classList.add('hidden');resetBall();showNumberLevelSelect();return;
+  if(S.round>=30){
+    finishGeneric('30球終了！',`トレーニング完了\n+${S.round*0} pt`);
+    return;
   }
-  if(S.mode==='rules'){
-    $('#msg').classList.add('hidden');resetBall();showRuleLevelSelect();return;
-  }
-  if(S.round>=30){S.running=false;show(null);resetBall();$('#msg').classList.remove('hidden');$('#msg').textContent='30球終了！';return}
-  S.round++;updateProgress();$('#msg').classList.add('hidden');resetBall();clearTimeout(S.timer);
+  S.round++;updateVisualProgress();
+  $('#msg').classList.add('hidden');resetBall();clearTimeout(S.timer);
   if(S.mode==='course')course();
   if(S.mode==='pitch')pitch();
   if(S.mode==='flash')flash();
-  if(S.mode==='select')select();
+  if(S.mode==='select')selectMode();
   if(S.mode==='reaction')reaction();
 }
-function course(){show('courseAns');S.answer=String(1+Math.floor(Math.random()*9));let p=coursePos(+S.answer);animate(p.x,p.y);S.startTs=performance.now()+duration()}
+function course(){
+  showAnswerPanel('courseAns');
+  const a=1+Math.floor(Math.random()*9);S.answer=String(a);
+  const p=coursePos(a);animate(p.x,p.y);S.startTs=performance.now()+duration();
+}
 function pitch(){
- show('pitchAns');let arr=['straight','slider','curve','fork','change'];let t=arr[Math.floor(Math.random()*arr.length)];S.answer=t;
- let x=0,y=coursePos(5).y;
- if(t==='slider')x+=(S.batter==='left'?78:-78);
- if(t==='curve'){x+=(S.batter==='left'?55:-55);y+=42}
- if(t==='fork')y+=72;if(t==='change')y+=25;
- animate(x,y);S.startTs=performance.now()+duration()
+  showAnswerPanel('pitchAns');
+  const types=['straight','slider','curve','fork','change'];
+  const t=types[Math.floor(Math.random()*types.length)];S.answer=t;
+  let x=0,y=245;
+  if(t==='slider')x=75;
+  if(t==='curve'){x=-55;y=285}
+  if(t==='fork')y=315;
+  if(t==='change'){x=25;y=275}
+  animate(x,y);S.startTs=performance.now()+duration();
 }
 function flash(){
- let chars=['2','3','4','5','6','7','8','9'];let c=chars[Math.floor(Math.random()*chars.length)];S.answer=c;
- $('#flashAns').innerHTML=chars.map(x=>`<button data-answer="${x}">${x}</button>`).join('');show('flashAns');animate(0,250,c);
- setTimeout(()=>{$('#ball').textContent=''},Math.max(80,duration()*.52));S.startTs=performance.now()+duration()
+  showAnswerPanel('flashAns');
+  const vals=['3','6','8','9','12','15'];
+  const v=vals[Math.floor(Math.random()*vals.length)];S.answer=v;
+  $('#flashAns').innerHTML=shuffleArray(vals).slice(0,3).map(x=>`<button data-answer="${x}">${x}</button>`).join('');
+  animate(0,235,v);
+  const showMs=S.difficulty==='easy'?650:S.difficulty==='hard'?250:400;
+  S.timer=setTimeout(()=>$('#ball').classList.add('hidden'),showMs);
+  S.startTs=performance.now();
 }
-function select(){
-  show('selectAns');
-  let strike=Math.random()<.68;
-  S.answer=strike?'swing':'take';
+function selectMode(){
+  showAnswerPanel('selectAns');
+  const strike=Math.random()<.68;S.answer=strike?'swing':'take';
   let x,y;
-
-  if(strike){
-    let p=coursePos(1+Math.floor(Math.random()*9));
-    x=p.x; y=p.y;
-  }else{
-    const arena=$('#arena').getBoundingClientRect();
-    const zone=document.querySelector('.zone').getBoundingClientRect();
-    const startCenterX=arena.width/2;
-    const startCenterY=72;
-
-    const candidates=[
-      {cx:(zone.left-arena.left)-28, cy:(zone.top-arena.top)+zone.height*.25},
-      {cx:(zone.right-arena.left)+28, cy:(zone.top-arena.top)+zone.height*.25},
-      {cx:(zone.left-arena.left)-28, cy:(zone.top-arena.top)+zone.height*.75},
-      {cx:(zone.right-arena.left)+28, cy:(zone.top-arena.top)+zone.height*.75},
-      {cx:(zone.left-arena.left)+zone.width*.5, cy:(zone.bottom-arena.top)+28}
-    ];
-    const q=candidates[Math.floor(Math.random()*candidates.length)];
-    x=q.cx-startCenterX;
-    y=q.cy-startCenterY;
+  if(strike){const p=coursePos(1+Math.floor(Math.random()*9));x=p.x;y=p.y}
+  else{
+    const arena=$('#arena').getBoundingClientRect(),zone=document.querySelector('.zone').getBoundingClientRect();
+    const startCenterX=arena.width/2,startCenterY=72;
+    const c=[
+      {cx:(zone.left-arena.left)-28,cy:(zone.top-arena.top)+zone.height*.25},
+      {cx:(zone.right-arena.left)+28,cy:(zone.top-arena.top)+zone.height*.25},
+      {cx:(zone.left-arena.left)-28,cy:(zone.top-arena.top)+zone.height*.75},
+      {cx:(zone.right-arena.left)+28,cy:(zone.top-arena.top)+zone.height*.75},
+      {cx:(zone.left-arena.left)+zone.width*.5,cy:(zone.bottom-arena.top)+28}
+    ][Math.floor(Math.random()*5)];
+    x=c.cx-startCenterX;y=c.cy-startCenterY;
   }
-
-  animate(x,y);
-  S.startTs=performance.now()+duration();
+  animate(x,y);S.startTs=performance.now()+duration();
 }
 function reaction(){
- show('reactionAns');S.ready=false;S.answer='tap';$('#reactionBtn').textContent='待って…';$('#reactionBtn').classList.remove('good');
- let d=900+Math.random()*1800;S.timer=setTimeout(()=>{if(!S.running)return;S.ready=true;S.startTs=performance.now();$('#reactionBtn').textContent='今！タップ';$('#reactionBtn').classList.add('good')},d)
+  showAnswerPanel('reactionAns');
+  $('#reactionBtn').textContent='光ったらタップ';
+  S.answer='tap';S.ready=false;
+  const ranges=S.difficulty==='easy'?[1800,3200]:S.difficulty==='hard'?[700,1800]:[1100,2600];
+  const delay=ranges[0]+Math.random()*(ranges[1]-ranges[0]);
+  S.timer=setTimeout(()=>{
+    if(!S.running)return;
+    S.ready=true;S.startTs=performance.now();
+    $('#reactionBtn').textContent='今！タップ！';
+  },delay);
 }
-
-
-
-const RULE_QUESTIONS={
-beginner:[
- {type:'tf',q:'2ストライク後にバントしてファウルになった場合、打者は三振になる。',choices:['○','×'],answer:0,exp:'2ストライク後のバントファウルは三振で打者アウトです。'},
- {type:'mc',q:'四球になった打者はどうなる？',choices:['アウト','一塁へ進む','もう1球投げる'],answer:1,exp:'ボール4つで打者には一塁が与えられます。'},
- {type:'tf',q:'ファウルフライでも、地面に落ちる前に野手が正規に捕球すれば打者はアウトになる。',choices:['○','×'],answer:0,exp:'ファウル地域でも飛球を正規に捕球すれば打者アウトです。'},
- {type:'mc',q:'ストライクゾーンを通った投球を打者が見逃した場合は？',choices:['ストライク','ボール','ファウル'],answer:0,exp:'振らなくてもストライクゾーンを通ればストライクです。'},
- {type:'tf',q:'打者走者が一塁へ走るプレーでは、一塁手がボールを持って走者より先に一塁へ触れればアウトになる。',choices:['○','×'],answer:0,exp:'一塁への通常のフォースプレーではこれでアウトになります。'},
- {type:'mc',q:'捕球された外野フライで走者が次の塁へ進むとき必要なのは？',choices:['元の塁へのリタッチ','必ず盗塁のサイン','投手の許可'],answer:0,exp:'飛球が捕球された場合、走者は元の塁へリタッチしてから進塁します。'},
- {type:'tf',q:'打球がフェア地域のフェンスを越えれば、原則ホームランになる。',choices:['○','×'],answer:0,exp:'正規のフェア飛球が所定のフェンスを越えれば本塁打です。'},
- {type:'mc',q:'一塁走者がいるとき、内野ゴロで二塁を先に踏んで走者をアウトにするのは？',choices:['フォースアウト','三振','ボーク'],answer:0,exp:'進塁義務のある走者に対するフォースアウトです。'},
- {type:'tf',q:'3アウトになったら、そのチームの攻撃は終了する。',choices:['○','×'],answer:0,exp:'各イニングの攻撃は3アウトで交代します。'},
- {type:'mc',q:'打者が打ったボールが一塁線の外側を通り、ファウルと判定された。この打球は？',choices:['フェア','ファウル','ストライクではない'],answer:1,exp:'ファウルと判定された打球はファウルボールです。'},
- {type:'tf',q:'盗塁は、投手が投球する前後のタイミングで走者が次の塁を狙うプレーである。',choices:['○','×'],answer:0,exp:'走者が守備の隙をついて次塁を狙う代表的な走塁プレーです。'},
- {type:'mc',q:'打者が三振したら通常どうなる？',choices:['打者アウト','一塁へ進む','必ずもう1球'],answer:0,exp:'通常は三振で打者アウトです。ただし振り逃げが成立し得る場合があります。'}
-],
-intermediate:[
- {type:'mc',q:'無死または一死で、走者一・二塁または満塁。内野手が普通に捕れそうなフェア飛球（ライナー・バント除く）は？',choices:['インフィールドフライ','ボーク','振り逃げ'],answer:0,exp:'条件を満たせばインフィールドフライが宣告され、打者はアウトです。'},
- {type:'tf',q:'二死なら、一塁に走者がいても捕手が第3ストライクを正規に捕球していない場合、振り逃げの対象になり得る。',choices:['○','×'],answer:0,exp:'二死の場合は一塁走者の有無に関わらず振り逃げの対象になり得ます。'},
- {type:'tf',q:'捕球された飛球で走者がリタッチせず進塁した場合、守備側の正しいアピールでアウトになることがある。',choices:['○','×'],answer:0,exp:'リタッチ義務違反はアピールプレイの対象です。'},
- {type:'mc',q:'一死三塁。外野フライを捕球後、三塁走者がリタッチして本塁へ生還。これは？',choices:['得点になり得る','必ずアウト','必ずファウル'],answer:0,exp:'正しくリタッチして本塁へ到達すれば犠牲フライによる得点になり得ます。'},
- {type:'tf',q:'走者に進塁義務がない場合、野手が塁を踏むだけでは通常その走者をアウトにできない。',choices:['○','×'],answer:0,exp:'フォース状態でない走者には通常タッグが必要です。'},
- {type:'mc',q:'ボークが宣告されたとき、一般に走者はどうなる？',choices:['原則1個進塁','必ず元の塁へ戻る','全員アウト'],answer:0,exp:'ボークでは原則として各走者に1個の進塁が与えられます。'},
- {type:'tf',q:'守備妨害が認められた場合、妨害した側にアウト等の罰則が適用されることがある。',choices:['○','×'],answer:0,exp:'プレーを妨げた状況に応じてアウト等が適用されます。'},
- {type:'mc',q:'一死一塁。打者が内野ゴロ。遊撃手→二塁→一塁と送球して両方アウト。これは？',choices:['併殺','犠打','ボーク'],answer:0,exp:'1つの連続したプレーで2アウトを取るので併殺です。'},
- {type:'tf',q:'フェアボールが審判員に当たった場合、必ず即ボールデッドになる。',choices:['○','×'],answer:1,exp:'当たった状況によって扱いが異なり、必ず即ボールデッドではありません。'},
- {type:'mc',q:'捕手が投球を後逸し、走者が進塁した。記録上考えられるものは？',choices:['暴投または捕逸','必ず盗塁','必ず失策'],answer:0,exp:'投球の性質や捕球可能性により暴投・捕逸などが判断されます。'},
- {type:'tf',q:'打者走者が一塁を駆け抜けた直後、二塁へ向かう意思を示さなければ、一定条件で一塁へ戻ることができる。',choices:['○','×'],answer:0,exp:'一塁は駆け抜けが認められています。'},
- {type:'mc',q:'無死一塁。ライナーを一塁手が捕球し、飛び出していた一塁走者より先に一塁へ触れた。結果は？',choices:['併殺になり得る','打者だけアウト','走者だけアウト'],answer:0,exp:'打者は捕球でアウト、走者はリタッチできずアピールでアウトになり得ます。'}
-],
-advanced:[
- {type:'mc',q:'二死満塁。打者が内野ゴロ。一塁走者が二塁でフォースアウトになる前に三塁走者が本塁を踏んだ。得点は？',choices:['入らない','必ず入る','審判の気分で決まる'],answer:0,exp:'第3アウトがフォースアウトの場合、そのプレーでの得点は認められません。'},
- {type:'tf',q:'第3アウトが打者走者の一塁到達前のアウトなら、そのプレー中に本塁へ到達した走者の得点は認められない。',choices:['○','×'],answer:0,exp:'第3アウトが打者走者の一塁到達前のアウトの場合、得点は認められません。'},
- {type:'mc',q:'一死一・三塁。外野フライを捕球。三塁走者はリタッチして生還、一塁走者は離塁が早くアピールで第3アウト。得点は？',choices:['状況により認められる','必ず無効','必ず2点'],answer:0,exp:'第3アウトがフォースアウトでないアピールアウトの場合、得点時期などによって得点が認められることがあります。'},
- {type:'tf',q:'インフィールドフライが宣告されても、ボールそのものは自動的にボールデッドになるわけではない。',choices:['○','×'],answer:0,exp:'インフィールドフライでもボールは原則インプレイです。'},
- {type:'mc',q:'一死二塁。ライナーを遊撃手が故意に落として併殺を狙った。適用が問題になるのは？',choices:['故意落球','ボーク','振り逃げ'],answer:0,exp:'一定条件では故意落球に関する規則が適用されます。'},
- {type:'tf',q:'走者が守備者の送球を故意に妨げた場合、守備妨害になることがある。',choices:['○','×'],answer:0,exp:'故意にプレーを妨げれば守備妨害の対象になります。'},
- {type:'mc',q:'二死二塁。打者が安打、二塁走者が生還後、打者走者が一塁を回って二塁でタッチアウト。得点は？',choices:['一般に認められる','必ず無効','打者がアウトなので0点'],answer:0,exp:'第3アウトがフォースアウト等でなければ、先に本塁到達した得点が認められる場合があります。'},
- {type:'tf',q:'アピールプレイによるアウトは、守備側が適切にアピールしなければ成立しない種類がある。',choices:['○','×'],answer:0,exp:'離塁が早い・塁の踏み忘れなどはアピールが必要です。'},
- {type:'mc',q:'無死一塁。打者がバントし、打球に打者走者がフェア地域で触れて守備を妨げた。考えられる判定は？',choices:['打者走者アウト','必ずファウル','必ず一塁セーフ'],answer:0,exp:'フェアボールに触れて守備を妨げた状況では打者走者アウトとなり得ます。'},
- {type:'tf',q:'投手がプレートに触れた状態で規則に反するけん制動作をすれば、ボークが宣告されることがある。',choices:['○','×'],answer:0,exp:'投手板に触れている際の不正な投球・送球動作などはボークの対象です。'},
- {type:'mc',q:'一死満塁。捕球可能な内野フライでインフィールドフライ宣告後、三塁走者が捕球後にリタッチして生還。得点は？',choices:['成立し得る','絶対に無効','打者がアウトなので走者は動けない'],answer:0,exp:'インフィールドフライでもボールはインプレイで、捕球後のリタッチ進塁は可能です。'},
- {type:'tf',q:'打順を間違えて打席に入っただけで、投球前に必ず自動アウトになる。',choices:['○','×'],answer:1,exp:'打順違いはアピールの時期などで処置が変わり、単純な自動アウトではありません。'}
-],
-boys:[
- {type:'mc',q:'ボーイズリーグ中学生の部。連盟主催大会の通常試合は何回戦？',choices:['6回','7回','9回'],answer:1,exp:'2026年連盟主催大会規定では中学生の部は7回戦です。'},
- {type:'mc',q:'中学生の部で正式試合となる目安は何回終了？',choices:['3回','4回','5回'],answer:1,exp:'中学生の部は4回終了をもって正式試合とします。'},
- {type:'mc',q:'中学生の部。4回終了時のコールドゲーム点差は？',choices:['7点差','10点差','15点差'],answer:1,exp:'4回終了時は10点差、5回以降は7点差でコールドです。'},
- {type:'mc',q:'中学生の部。5回以降のコールドゲーム点差は？',choices:['5点差','7点差','10点差'],answer:1,exp:'5回以降は7点差でコールドゲームです。'},
- {type:'mc',q:'ボーイズリーグ中学生の投手。1日の最大投球数は？',choices:['70球','80球','100球'],answer:1,exp:'中学生の部は1日最大80球です。'},
- {type:'mc',q:'中学生の投手。連続する2日間の合計上限は？',choices:['100球','120球','160球'],answer:1,exp:'連続する2日間で120球以内です。'},
- {type:'tf',q:'中学生投手が連続する2日間で80球を超えて投げた場合、3日目は投球できない。',choices:['○','×'],answer:0,exp:'2026年大会規定では3日目は投球禁止です。'},
- {type:'tf',q:'ボーイズリーグの投球数では、ボークも1球として数える。',choices:['○','×'],answer:1,exp:'大会規定ではボークは投球数にしません。'},
- {type:'tf',q:'雨などでノーゲームになった試合の投球も、投球数にはカウントされる。',choices:['○','×'],answer:0,exp:'ノーゲームになっても投球は投球数にカウントされます。'},
- {type:'mc',q:'中学生の部のタイブレークは、どの状態から攻撃を始める？',choices:['無死二塁','一死満塁','二死満塁'],answer:1,exp:'連盟主催大会規定のタイブレークは一死走者満塁から開始します。'},
- {type:'tf',q:'ボーイズリーグでは、二塁走者やベースコーチが捕手のサインを盗み、打者へ球種やコースを伝える行為は禁止されている。',choices:['○','×'],answer:0,exp:'連盟主催大会規定で禁止されています。'},
- {type:'tf',q:'ベンチ内で携帯電話を使用してもよい。',choices:['○','×'],answer:1,exp:'連盟主催大会規定ではベンチ内での携帯電話使用は禁止です。'},
- {type:'mc',q:'監督またはコーチの指示は、通常1試合で攻撃・守備それぞれ何回まで？',choices:['各1回','各2回','各3回'],answer:1,exp:'通常は攻撃2回・守備2回、計4回です。'},
- {type:'tf',q:'1イニングで同一投手への指示が2回目になると、その投手は自動的に試合から退かなければならない。',choices:['○','×'],answer:0,exp:'2026年連盟主催大会規定に定められています。'},
- {type:'tf',q:'捕手は試合だけでなく練習でも、連盟が定めるヘルメット・防具を着用する。',choices:['○','×'],answer:0,exp:'大会規定では試合・練習を問わず規定防具の着用が必要です。'},
- {type:'mc',q:'中学生投手が3連投する場合、1日の投球数上限は？',choices:['30球','40球','50球'],answer:1,exp:'3連投する場合は1日の投球数を40球以内とします。'},
- {type:'tf',q:'中学生投手の4連投（連続4日間）は認められている。',choices:['○','×'],answer:1,exp:'4連投は禁止されています。'},
- {type:'tf',q:'投球数制限に達したのが打者の途中なら、その打者の打席終了までは投球できる。',choices:['○','×'],answer:0,exp:'打者途中で制限数に達した場合、その打席終了までは投球が認められます。'},
- {type:'mc',q:'中学生の部のタイブレークで、規定により置かれる3走者の扱いは？',choices:['投手の自責点になる','投手の自責点にはしない','全員代走扱い'],answer:1,exp:'規定により出塁した3走者は投手の自責点にはなりません。'},
- {type:'tf',q:'審判員の判定そのものへの抗議は認められないが、ルールの適用について確認することは認められる。',choices:['○','×'],answer:0,exp:'連盟主催大会規定ではこのように定められています。'}
-]
-};
-
-const QUIZ_LEVEL_NAMES={
-  beginner:'🌱 初級',
-  intermediate:'⚾ 中級',
-  advanced:'🔥 上級',
-  boys:'🏆 ボーイズ実戦'
-};
+function visualAnswer(v){
+  if(!S.running||S.answer===null)return;
+  if(S.mode==='reaction'&&!S.ready){
+    $('#msg').classList.remove('hidden');$('#msg').textContent='早すぎ！';
+    showAnswerPanel(null);S.answer=null;setTimeout(nextVisual,900);return;
+  }
+  const correctValue=S.answer;
+  const ok=String(v)===String(correctValue);
+  const rt=Math.max(0,performance.now()-S.startTs);
+  S.answer=null;
+  if(ok){S.streak++;let pts=10;if(S.streak%5===0)pts+=20;addPoints(pts)}
+  else S.streak=0;
+  $('#msg').classList.remove('hidden');
+  $('#msg').textContent=ok?'○ 正解':('× 不正解\n正解：'+answerLabel(S.mode,correctValue));
+  showAnswerPanel(null);
+  setTimeout(nextVisual,1000);
+}
 
 function shuffleArray(arr){
   const a=[...arr];
-  for(let i=a.length-1;i>0;i--){
-    const j=Math.floor(Math.random()*(i+1));
-    [a[i],a[j]]=[a[j],a[i]];
-  }
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}
   return a;
 }
-function showRuleLevelSelect(){
-  show('rulesAns');
-  $('#quizLevelSelect').classList.remove('hidden');
-  $('#quizPlay').classList.add('hidden');
-}
-function chooseRuleLevel(level){
-  if(!RULE_QUESTIONS[level])return;
-  S.quizLevel=level;
-  S.quizQuestions=shuffleArray(RULE_QUESTIONS[level]).slice(0,10);
-  S.quizIndex=0;
-  S.quizCorrect=0;
-  S.quizLocked=false;
-  $('#quizLevelSelect').classList.add('hidden');
-  $('#quizPlay').classList.remove('hidden');
-  $('#quizLevelName').textContent=QUIZ_LEVEL_NAMES[level];
-  renderRuleQuestion();
-}
-function renderRuleQuestion(){
-  if(S.quizIndex>=S.quizQuestions.length){
-    finishRules();return;
-  }
-  const q=S.quizQuestions[S.quizIndex];
-  $('#quizNo').textContent=S.quizIndex+1;
-  $('#quizCorrect').textContent=S.quizCorrect;
-  $('#quizQuestion').textContent=q.q;
-  const cls=q.choices.length===2?'two':'three';
-  $('#quizChoices').className='quizChoices '+cls;
-  $('#quizChoices').innerHTML=q.choices.map((c,i)=>`<button data-quiz="${i}">${c}</button>`).join('');
-  $('#quizExplain').classList.add('hidden');
-  $('#quizExplain').textContent='';
-  $('#quizNextBtn').classList.add('hidden');
-  S.quizLocked=false;
-}
-function answerRule(idx){
-  if(!S.running||S.mode!=='rules'||S.quizLocked)return;
-  S.quizLocked=true;
-  const q=S.quizQuestions[S.quizIndex];
-  const ok=Number(idx)===q.answer;
-  if(ok){S.quizCorrect++;addPoints(20)}
-  $('#quizCorrect').textContent=S.quizCorrect;
-  $('#quizExplain').classList.remove('hidden');
-  $('#quizExplain').textContent=(ok?'○ 正解！ +20pt':'× 不正解')+'\n'+q.exp;
-  $('#quizExplain').style.whiteSpace='pre-line';
-  $('#quizNextBtn').classList.remove('hidden');
-}
-function nextRuleQuestion(){
-  if(!S.running||S.mode!=='rules')return;
-  S.quizIndex++;
-  renderRuleQuestion();
-}
-function finishRules(){
-  S.running=false;
-  show(null);
-  const bonus=S.quizCorrect===10?100:S.quizCorrect>=8?50:0;
-  if(bonus)addPoints(bonus);
-  $('#msg').classList.remove('hidden');
-  $('#msg').style.whiteSpace='pre-line';
-  let t=QUIZ_LEVEL_NAMES[S.quizLevel]+' 終了！\n10問中 '+S.quizCorrect+'問正解';
-  if(bonus)t+='\nボーナス +'+bonus+'pt';
-  if(S.quizCorrect===10)t+='\n🏆 PERFECT！';
-  $('#msg').textContent=t;
-  S.records.push({
-    time:new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}),
-    mode:'rules',correct:S.quizCorrect>=8,rt:null,streak:0
-  });
-  save();
-}
 
-
-const NUMBER_LEVEL_NAMES={beginner:'🌱 初級 3×3',intermediate:'⚾ 中級 4×4',advanced:'🔥 上級 5×5'};
-function shuffleNumbers(max){
-  const arr=Array.from({length:max},(_,i)=>i+1);
-  for(let i=arr.length-1;i>0;i--){
-    const j=Math.floor(Math.random()*(i+1));
-    [arr[i],arr[j]]=[arr[j],arr[i]];
-  }
-  return arr;
-}
-function showNumberLevelSelect(){
-  show('numbersAns');
-  $('#numberLevelSelect').classList.remove('hidden');
-  $('#numberPlay').classList.add('hidden');
-}
-function chooseNumberLevel(level){
-  S.numberLevel=level;
-  S.numberMax=level==='beginner'?9:level==='intermediate'?16:25;
-  $('#numberLevelSelect').classList.add('hidden');
-  $('#numberPlay').classList.remove('hidden');
-  runNumbers();
-}
-function runNumbers(){
+/* NUMBERS */
+function startNumbers(){
   S.numberNext=1;
+  S.numberMax=S.difficulty==='beginner'?9:S.difficulty==='intermediate'?16:25;
   S.numberStart=performance.now();
   $('#nextNumber').textContent='1';
   $('#numberTime').textContent='0.00';
-  $('#numberLevelName').textContent=NUMBER_LEVEL_NAMES[S.numberLevel];
-  const best=getNumberBest(S.numberLevel);
+  $('#numberLevelName').textContent=buildMeta();
+  const best=getNumberBest(S.difficulty);
   $('#numberBest').textContent=best?(best/1000).toFixed(2)+' 秒':'記録なし';
-
-  const nums=shuffleNumbers(S.numberMax);
-  const gridClass=S.numberLevel==='beginner'?'grid3':S.numberLevel==='intermediate'?'grid4':'grid5';
-  $('#numberGrid').className='numberGrid '+gridClass;
+  const nums=shuffleArray(Array.from({length:S.numberMax},(_,i)=>i+1));
+  const cls=S.difficulty==='beginner'?'grid3':S.difficulty==='intermediate'?'grid4':'grid5';
+  $('#numberGrid').className='numberGrid '+cls;
   $('#numberGrid').innerHTML=nums.map(n=>`<button data-number="${n}">${n}</button>`).join('');
-
-  if(S.numberLevel==='advanced'){
-    $('#numberHelp').textContent='数字は1秒だけ表示されます。消えた位置を覚えて、正しいマスをタップ！';
+  if(S.difficulty==='advanced'){
+    $('#numberHelp').textContent='次の数字が1秒だけ表示されます。消えた位置を覚えてタップ！';
     $$('#numberGrid button').forEach(b=>b.classList.add('hiddenNumber'));
-    setTimeout(()=>flashAdvancedNumber(),350);
+    setTimeout(flashAdvancedNumber,350);
   }else{
-    $('#numberHelp').textContent=S.numberLevel==='beginner'?'1→9をできるだけ速くタップ！':'1→16をできるだけ速くタップ！';
+    $('#numberHelp').textContent=`1→${S.numberMax}をできるだけ速くタップ！`;
   }
-
   clearInterval(S.numberTimer);
-  S.numberTimer=setInterval(()=>{
-    if(!S.running||S.mode!=='numbers')return;
-    $('#numberTime').textContent=((performance.now()-S.numberStart)/1000).toFixed(2);
-  },50);
+  S.numberTimer=setInterval(()=>{if(S.running)$('#numberTime').textContent=((performance.now()-S.numberStart)/1000).toFixed(2)},50);
 }
 function flashAdvancedNumber(){
-  if(!S.running||S.mode!=='numbers'||S.numberLevel!=='advanced')return;
+  if(!S.running||S.mode!=='numbers'||S.difficulty!=='advanced')return;
   clearTimeout(S.numberFlashTimer);
   const btn=$(`#numberGrid button[data-number="${S.numberNext}"]`);
   if(!btn)return;
-  btn.classList.remove('hiddenNumber');
-  btn.classList.add('flashNumber');
-  S.numberFlashTimer=setTimeout(()=>{
-    btn.classList.add('hiddenNumber');
-    btn.classList.remove('flashNumber');
-  },1000);
+  btn.classList.remove('hiddenNumber');btn.classList.add('flashNumber');
+  S.numberFlashTimer=setTimeout(()=>{btn.classList.add('hiddenNumber');btn.classList.remove('flashNumber')},1000);
 }
 function numberTap(btn){
-  if(!S.running||S.mode!=='numbers'||!S.numberLevel)return;
+  if(!S.running||S.mode!=='numbers')return;
   const n=Number(btn.dataset.number);
-
   if(n!==S.numberNext){
-    btn.classList.add('wrong');
-    setTimeout(()=>btn.classList.remove('wrong'),220);
-    if(S.numberLevel==='advanced')setTimeout(()=>flashAdvancedNumber(),450);
+    btn.classList.add('wrong');setTimeout(()=>btn.classList.remove('wrong'),220);
+    if(S.difficulty==='advanced')setTimeout(flashAdvancedNumber,400);
     return;
   }
-
-  btn.classList.add('done');
-  btn.classList.remove('hiddenNumber','flashNumber');
-
+  btn.classList.add('done');btn.classList.remove('hiddenNumber','flashNumber');
   if(n===S.numberMax){
-    clearInterval(S.numberTimer);
-    clearTimeout(S.numberFlashTimer);
+    clearInterval(S.numberTimer);clearTimeout(S.numberFlashTimer);
     const elapsed=performance.now()-S.numberStart;
-    const oldBest=getNumberBest(S.numberLevel);
-    const isFirst=!oldBest;
-    const isBest=!!oldBest && elapsed<oldBest;
-    let pts=S.numberLevel==='beginner'?50:S.numberLevel==='intermediate'?80:120;
-
-    if(isFirst){
-      setNumberBest(elapsed,S.numberLevel);
-    }else if(isBest){
-      pts+=100;
-      setNumberBest(elapsed,S.numberLevel);
-    }
+    const oldBest=getNumberBest(S.difficulty);
+    const isFirst=!oldBest,isBest=!!oldBest&&elapsed<oldBest;
+    let pts=S.difficulty==='beginner'?50:S.difficulty==='intermediate'?80:120;
+    if(isFirst)setNumberBest(elapsed,S.difficulty);
+    else if(isBest){pts+=100;setNumberBest(elapsed,S.difficulty)}
     addPoints(pts);
-
-    $('#numberTime').textContent=(elapsed/1000).toFixed(2);
-    const savedBest=isFirst||isBest?elapsed:oldBest;
-    $('#numberBest').textContent=(savedBest/1000).toFixed(2)+' 秒';
-
-    S.records.push({
-      time:new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}),
-      mode:'numbers',correct:true,rt:elapsed,streak:0
-    });
-    save();
-    S.running=false;
-    $('#msg').classList.remove('hidden');
-    $('#msg').classList.add('celebrate');
-    let head=isFirst?'🎯 初記録！':isBest?'🔥 自己ベスト更新！':'🎯 完了！';
-    $('#msg').textContent=head+'\n'+(elapsed/1000).toFixed(2)+' 秒\n+'+pts+' pt';
-    $('#msg').style.whiteSpace='pre-line';
+    const head=isFirst?'🎯 初記録！':isBest?'🔥 自己ベスト更新！':'🎯 完了！';
+    finishGeneric(head,`${(elapsed/1000).toFixed(2)} 秒\n+${pts} pt`);
     return;
   }
-
-  S.numberNext++;
-  $('#nextNumber').textContent=S.numberNext;
-  if(S.numberLevel==='advanced')setTimeout(()=>flashAdvancedNumber(),500);
+  S.numberNext++;$('#nextNumber').textContent=S.numberNext;
+  if(S.difficulty==='advanced')setTimeout(flashAdvancedNumber,500);
 }
 
-function answer(v){
- if(!S.running||S.answer===null)return;
- if(S.mode==='reaction'&&!S.ready){
-   S.records.push({time:new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}),mode:S.mode,correct:false,rt:null,streak:0});
-   S.streak=0;save();$('#msg').classList.remove('hidden');$('#msg').textContent='早すぎ！';show(null);setTimeout(next,650);return
- }
- const correctValue=S.answer;
- let rt=Math.max(0,performance.now()-S.startTs),ok=String(v)===String(correctValue);
- S.answer=null;
- feedback(ok,rt,correctValue)
+/* RULE QUIZ */
+const RULE_QUESTIONS={
+beginner:[
+ {q:'2ストライク後にバントしてファウルになった場合、打者は三振になる。',c:['○','×'],a:0,e:'2ストライク後のバントファウルは三振で打者アウトです。'},
+ {q:'四球になった打者はどうなる？',c:['アウト','一塁へ進む','もう1球投げる'],a:1,e:'ボール4つで打者には一塁が与えられます。'},
+ {q:'ファウルフライでも、地面に落ちる前に正規に捕球すれば打者はアウトになる。',c:['○','×'],a:0,e:'ファウル地域でも飛球を正規に捕球すれば打者アウトです。'},
+ {q:'捕球された外野フライで走者が進塁するとき必要なのは？',c:['元の塁へのリタッチ','投手の許可','必ず盗塁サイン'],a:0,e:'捕球された飛球では元の塁へリタッチしてから進塁します。'}
+],
+intermediate:[
+ {q:'二死なら、一塁に走者がいても捕手が第3ストライクを正規に捕球していない場合、振り逃げの対象になり得る。',c:['○','×'],a:0,e:'二死の場合は一塁走者の有無に関わらず振り逃げの対象になり得ます。'},
+ {q:'無死または一死で走者一・二塁または満塁、普通に捕れそうな内野飛球は？',c:['インフィールドフライ','ボーク','振り逃げ'],a:0,e:'条件を満たせばインフィールドフライが宣告されます。'},
+ {q:'ボークが宣告されたとき、一般に走者はどうなる？',c:['原則1個進塁','必ず戻る','全員アウト'],a:0,e:'ボークでは原則として各走者に1個の進塁が与えられます。'},
+ {q:'一死一塁。内野ゴロで二塁→一塁と送球して両方アウト。これは？',c:['併殺','犠打','ボーク'],a:0,e:'1つの連続したプレーで2アウトを取るので併殺です。'}
+],
+advanced:[
+ {q:'二死満塁。内野ゴロで一塁走者が二塁フォースアウトになる前に三塁走者が本塁を踏んだ。得点は？',c:['入らない','必ず入る','審判次第'],a:0,e:'第3アウトがフォースアウトの場合、そのプレーでの得点は認められません。'},
+ {q:'インフィールドフライが宣告されても、ボールは自動的にボールデッドにはならない。',c:['○','×'],a:0,e:'インフィールドフライでもボールは原則インプレイです。'},
+ {q:'アピールプレイによるアウトは、守備側が適切にアピールしなければ成立しない種類がある。',c:['○','×'],a:0,e:'離塁が早い・塁の踏み忘れなどはアピールが必要です。'},
+ {q:'投手がプレートに触れた状態で規則に反するけん制動作をすれば、ボークが宣告されることがある。',c:['○','×'],a:0,e:'投手板に触れている際の不正な投球・送球動作などはボークの対象です。'}
+],
+boys:[
+ {q:'ボーイズリーグ中学生の部。通常試合は何回戦？',c:['6回','7回','9回'],a:1,e:'中学生の部は7回戦です。'},
+ {q:'中学生の部。4回終了時のコールドゲーム点差は？',c:['7点差','10点差','15点差'],a:1,e:'4回終了時は10点差です。'},
+ {q:'中学生投手の1日の最大投球数は？',c:['70球','80球','100球'],a:1,e:'中学生の部は1日最大80球です。'},
+ {q:'ボークは投球数に数える。',c:['○','×'],a:1,e:'ボークは投球数には数えません。'}
+]
+};
+function startRules(){
+  const base=RULE_QUESTIONS[S.difficulty]||RULE_QUESTIONS.beginner;
+  let pool=[];
+  while(pool.length<10)pool=pool.concat(shuffleArray(base));
+  S.quizQuestions=pool.slice(0,10);S.quizIndex=0;S.quizCorrect=0;S.quizLocked=false;
+  renderRuleQuestion();
 }
-$$('.mode').forEach(b=>b.addEventListener('click',()=>{
-  if(S.running)return;
-  $$('.mode').forEach(x=>x.classList.remove('active'));
-  b.classList.add('active');
-  S.mode=b.dataset.mode;
-  $('#modeName').textContent=names[S.mode];
-  $('#msg').classList.remove('celebrate');
-  if(S.mode==='numbers'){
-    $('#setCount').textContent='-';$('#progress').style.width='0%';
-    $('#msg').classList.remove('hidden');$('#msg').textContent='開始を押して\n数字タップの難易度を選択';$('#msg').style.whiteSpace='pre-line';
-  }else if(S.mode==='rules'){
-    $('#setCount').textContent='-';$('#progress').style.width='0%';
-    $('#msg').classList.remove('hidden');$('#msg').textContent='開始を押して\n○×・3択の野球ルールクイズ';$('#msg').style.whiteSpace='pre-line';
-  }else{
-    $('#setCount').textContent='0';$('#progress').style.width='0%';
-    $('#msg').classList.remove('hidden');$('#msg').textContent='「開始」を押してください';
-  }
-}));
-$('#speed').addEventListener('input',e=>{S.speed=+e.target.value;$('#speedText').textContent=S.speed});
+function renderRuleQuestion(){
+  if(S.quizIndex>=10){finishRules();return}
+  const q=S.quizQuestions[S.quizIndex];
+  $('#quizLevelName').textContent=buildMeta();
+  $('#quizNo').textContent=S.quizIndex+1;
+  $('#quizCorrect').textContent=S.quizCorrect;
+  $('#quizQuestion').textContent=q.q;
+  $('#quizChoices').className='quizChoices '+(q.c.length===2?'two':'three');
+  $('#quizChoices').innerHTML=q.c.map((c,i)=>`<button data-quiz="${i}">${c}</button>`).join('');
+  $('#quizExplain').classList.add('hidden');$('#quizExplain').textContent='';
+  $('#quizNextBtn').classList.add('hidden');
+  $('#trainingCounter').textContent=(S.quizIndex+1)+'/10';
+  $('#progressText').textContent=(S.quizIndex+1)+'/10';
+  $('#progress').style.width=((S.quizIndex+1)/10*100)+'%';
+  S.quizLocked=false;
+}
+function answerRule(idx){
+  if(!S.running||S.quizLocked)return;
+  S.quizLocked=true;
+  const q=S.quizQuestions[S.quizIndex],ok=Number(idx)===q.a;
+  if(ok){S.quizCorrect++;addPoints(20)}
+  $('#quizCorrect').textContent=S.quizCorrect;
+  $('#quizExplain').classList.remove('hidden');
+  $('#quizExplain').textContent=(ok?'○ 正解！ +20pt':'× 不正解')+'\n'+q.e;
+  $('#quizNextBtn').classList.remove('hidden');
+}
+function nextRuleQuestion(){if(!S.running)return;S.quizIndex++;renderRuleQuestion()}
+function finishRules(){
+  let bonus=S.quizCorrect===10?100:S.quizCorrect>=8?50:0;
+  if(bonus)addPoints(bonus);
+  let t=`10問中 ${S.quizCorrect}問正解`;
+  if(bonus)t+=`\nボーナス +${bonus}pt`;
+  if(S.quizCorrect===10)t+='\n🏆 PERFECT！';
+  finishGeneric('ルールクイズ終了！',t);
+}
+
+function finishGeneric(title,text){
+  stopAll();
+  $('#resultTitle').textContent=title;
+  $('#resultText').textContent=text;
+  showScreen('screenResult');
+}
+
+$$('[data-menu]').forEach(b=>b.addEventListener('click',()=>openSettings(b.dataset.menu)));
+$('#settingsHomeBtn').addEventListener('click',goTop);
+$('#trainingHomeBtn').addEventListener('click',goTop);
+$('#resultHomeBtn').addEventListener('click',goTop);
+$('#retryBtn').addEventListener('click',()=>openSettings(S.mode));
+$('#stopBtn').addEventListener('click',()=>{
+  stopAll();
+  $('#resultTitle').textContent='トレーニングを中止しました';
+  $('#resultText').textContent='記録途中で終了しました。';
+  showScreen('screenResult');
+});
+$('#settingsStartBtn').addEventListener('click',startTraining);
+
+$('#speed').addEventListener('input',e=>{S.speed=Number(e.target.value);$('#speedText').textContent=S.speed});
 $('#leftBat').addEventListener('click',()=>{S.batter='left';$('#leftBat').classList.add('active');$('#rightBat').classList.remove('active')});
 $('#rightBat').addEventListener('click',()=>{S.batter='right';$('#rightBat').classList.add('active');$('#leftBat').classList.remove('active')});
-$('#startBtn').addEventListener('click',()=>{S.running=true;S.round=0;S.streak=0;$('#msg').classList.remove('celebrate');if(S.mode!=='numbers'&&S.mode!=='rules')updateProgress();next()});
-$('#stopBtn').addEventListener('click',()=>{S.running=false;clearTimeout(S.timer);clearInterval(S.numberTimer);clearTimeout(S.numberFlashTimer);S.quizLocked=true;show(null);resetBall();$('#msg').classList.remove('hidden');$('#msg').textContent='停止しました'});
-document.body.addEventListener('click',e=>{let b=e.target.closest('[data-answer]');if(b)answer(b.dataset.answer)});
-document.body.addEventListener('click',e=>{let b=e.target.closest('[data-number]');if(b)numberTap(b)});
-document.body.addEventListener('click',e=>{let b=e.target.closest('[data-number-level]');if(b)chooseNumberLevel(b.dataset.numberLevel)});
-document.body.addEventListener('click',e=>{let b=e.target.closest('[data-quiz]');if(b)answerRule(b.dataset.quiz)});
-document.body.addEventListener('click',e=>{let b=e.target.closest('[data-quiz-level]');if(b)chooseRuleLevel(b.dataset.quizLevel)});
-$('#reactionBtn').addEventListener('click',()=>answer('tap'));
-$('#clearBtn').addEventListener('click',()=>{if(confirm('今日の記録を削除しますか？')){S.records=[];S.streak=0;S.bestStreak=0;localStorage.removeItem(key());renderStats()}});
 
+document.body.addEventListener('click',e=>{
+  const d=e.target.closest('[data-diff]');
+  if(d){S.difficulty=d.dataset.diff;highlightDifficulty()}
+  const a=e.target.closest('[data-answer]');
+  if(a)visualAnswer(a.dataset.answer);
+  const n=e.target.closest('[data-number]');
+  if(n)numberTap(n);
+  const q=e.target.closest('[data-quiz]');
+  if(q)answerRule(q.dataset.quiz);
+});
 $('#quizNextBtn').addEventListener('click',nextRuleQuestion);
-load();
+
+loadPoints();
+
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
       const regs=await navigator.serviceWorker.getRegistrations();
-      for(const reg of regs){await reg.unregister();}
+      for(const r of regs)await r.unregister();
       const keys=await caches.keys();
-      for(const k of keys){if(k.startsWith('baseball-vision-')) await caches.delete(k);}
+      for(const k of keys)await caches.delete(k);
     }catch(e){}
   });
 }
