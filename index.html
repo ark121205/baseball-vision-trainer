@@ -116,6 +116,19 @@ padding:12px 16px;border-radius:13px;font-weight:800;text-align:center;backdrop-
 .resultBox{text-align:center;padding:22px 12px}
 .resultBox .big{font-size:28px;font-weight:900;margin-bottom:8px}
 .resultBox button{width:100%;margin-top:10px}
+
+.arena.reactionGo{
+  background:
+    radial-gradient(circle at 50% 50%,rgba(255,255,255,.95) 0%,rgba(120,255,170,.95) 12%,rgba(42,209,139,.85) 28%,#102a52 58%,#061123 100%);
+  box-shadow:0 0 38px rgba(66,209,139,.75) inset,0 0 24px rgba(66,209,139,.35);
+}
+#reactionBtn.reactionGo{
+  background:linear-gradient(135deg,#7dffb2,#d6ffe6);
+  color:#052514;
+  box-shadow:0 0 20px rgba(66,209,139,.95);
+  transform:scale(1.02);
+}
+
 </style>
 </head>
 <body>
@@ -125,7 +138,7 @@ padding:12px 16px;border-radius:13px;font-weight:800;text-align:center;backdrop-
   <section id="screenTop" class="screen active">
     <div class="topHeader">
       <h1>⚾ 野球ビジョントレーナー</h1>
-      <div class="sub">視覚・反応・判断・ルール　<span class="version">v1.2</span></div>
+      <div class="sub">視覚・反応・判断・ルール　<span class="version">v1.3</span></div>
     </div>
 
     <section class="card">
@@ -440,8 +453,11 @@ function updateVisualProgress(){
   $('#progress').style.width=(S.round/30*100)+'%';
 }
 function resetBall(){
-  const b=$('#ball'); if(!b)return;
-  b.classList.add('hidden');b.style.transition='none';b.style.transform='translate(0,0) scale(.55)';b.textContent='';
+  const b=$('#ball'); if(b){
+    b.classList.add('hidden');b.style.transition='none';b.style.transform='translate(0,0) scale(.55)';b.textContent='';
+  }
+  const arena=$('#arena'); if(arena) arena.classList.remove('reactionGo');
+  const rb=$('#reactionBtn'); if(rb) rb.classList.remove('reactionGo');
 }
 function duration(){
   let d=Math.max(300,1350-(S.speed-80)*14);
@@ -535,25 +551,53 @@ function selectMode(){
 }
 function reaction(){
   showAnswerPanel('reactionAns');
-  $('#reactionBtn').textContent='光ったらタップ';
-  S.answer='tap';S.ready=false;
+  const btn=$('#reactionBtn');
+  const arena=$('#arena');
+  btn.textContent='光ったらタップ';
+  btn.classList.remove('reactionGo');
+  arena.classList.remove('reactionGo');
+
+  S.answer='tap';
+  S.ready=false;
+
   const ranges=S.difficulty==='easy'?[1800,3200]:S.difficulty==='hard'?[700,1800]:[1100,2600];
   const delay=ranges[0]+Math.random()*(ranges[1]-ranges[0]);
+
   S.timer=setTimeout(()=>{
     if(!S.running)return;
-    S.ready=true;S.startTs=performance.now();
-    $('#reactionBtn').textContent='今！タップ！';
+    S.ready=true;
+    S.startTs=performance.now();
+
+    arena.classList.add('reactionGo');
+    btn.classList.add('reactionGo');
+    btn.textContent='今！タップ！';
   },delay);
 }
 function visualAnswer(v){
   if(!S.running||S.answer===null)return;
   if(S.mode==='reaction'&&!S.ready){
-    $('#msg').classList.remove('hidden');$('#msg').textContent='早すぎ！';
-    showAnswerPanel(null);S.answer=null;setTimeout(nextVisual,900);return;
+    clearTimeout(S.timer);
+    $('#arena').classList.remove('reactionGo');
+    $('#reactionBtn').classList.remove('reactionGo');
+    $('#msg').classList.remove('hidden');
+    $('#msg').textContent='早すぎ！\n光るまで待って';
+    showAnswerPanel(null);
+    S.answer=null;
+    setTimeout(()=>{
+      if(!S.running)return;
+      $('#msg').classList.add('hidden');
+      S.round=Math.max(0,S.round-1);
+      nextVisual();
+    },900);
+    return;
   }
   const correctValue=S.answer;
   const ok=String(v)===String(correctValue);
   const rt=Math.max(0,performance.now()-S.startTs);
+  if(S.mode==='reaction'){
+    $('#arena').classList.remove('reactionGo');
+    $('#reactionBtn').classList.remove('reactionGo');
+  }
   S.answer=null;
   if(ok){S.streak++;let pts=10;if(S.streak%5===0)pts+=20;addPoints(pts)}
   else S.streak=0;
