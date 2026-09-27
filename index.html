@@ -182,7 +182,7 @@ padding:12px 16px;border-radius:13px;font-weight:800;text-align:center;backdrop-
   <section id="screenTop" class="screen active">
     <div class="topHeader">
       <h1>⚾ 野球ビジョントレーナー</h1>
-      <div class="sub">視覚・反応・判断・ルール　<span class="version">v1.7</span></div>
+      <div class="sub">視覚・反応・判断・ルール　<span class="version">v1.8</span></div>
     </div>
 
     <section class="card">
@@ -743,41 +743,51 @@ function startNumbers(){
       b.classList.remove('done','wrong','flashNumber');
       b.classList.add('hiddenNumber');
     });
-    S.numberNextTimer=setTimeout(flashAdvancedNumber,350);
+    S.numberNextTimer=setTimeout(()=>flashAdvancedNumber(1),350);
   }else{
     $('#numberHelp').textContent=`1→${S.numberMax}をできるだけ速くタップ！`;
   }
   clearInterval(S.numberTimer);
   S.numberTimer=setInterval(()=>{if(S.running)$('#numberTime').textContent=((performance.now()-S.numberStart)/1000).toFixed(2)},50);
 }
-function flashAdvancedNumber(){
+function flashAdvancedNumber(targetNumber=null){
   if(!S.running||S.mode!=='numbers'||S.difficulty!=='advanced')return;
 
   clearTimeout(S.numberFlashTimer);
+  clearTimeout(S.numberNextTimer);
 
-  const btn=$(`#numberGrid button[data-number="${S.numberNext}"]`);
-  if(!btn){
-    clearTimeout(S.numberNextTimer);
-    S.numberNextTimer=setTimeout(flashAdvancedNumber,150);
-    return;
-  }
+  const target = targetNumber ?? S.numberNext;
+  S.numberNext = target;
+  $('#nextNumber').textContent=S.numberNext;
 
+  // 全マスを残し、数字だけ隠す
   $$('#numberGrid button').forEach(b=>{
-    b.classList.remove('flashNumber');
+    b.classList.remove('flashNumber','done');
     b.classList.add('hiddenNumber');
   });
+
+  const btn=$(`#numberGrid button[data-number="${target}"]`);
+
+  // 念のためDOMが取れなければ短時間後に同じ数字を再表示
+  if(!btn){
+    S.numberNextTimer=setTimeout(()=>flashAdvancedNumber(target),120);
+    return;
+  }
 
   btn.classList.remove('hiddenNumber');
   btn.classList.add('flashNumber');
 
+  // 0.5秒だけ表示
   S.numberFlashTimer=setTimeout(()=>{
     if(!S.running||S.mode!=='numbers'||S.difficulty!=='advanced')return;
-    btn.classList.add('hiddenNumber');
     btn.classList.remove('flashNumber');
+    btn.classList.add('hiddenNumber');
   },500);
 }
+
 function numberTap(btn){
   if(!S.running||S.mode!=='numbers')return;
+
   const n=Number(btn.dataset.number);
 
   if(n!==S.numberNext){
@@ -785,8 +795,8 @@ function numberTap(btn){
     setTimeout(()=>btn.classList.remove('wrong'),220);
 
     if(S.difficulty==='advanced'){
-      clearTimeout(S.numberNextTimer);
-      S.numberNextTimer=setTimeout(flashAdvancedNumber,250);
+      // 間違えたら同じ数字をもう一度表示
+      S.numberNextTimer=setTimeout(()=>flashAdvancedNumber(S.numberNext),250);
     }
     return;
   }
@@ -794,13 +804,16 @@ function numberTap(btn){
   if(S.difficulty==='advanced'){
     clearTimeout(S.numberFlashTimer);
     clearTimeout(S.numberNextTimer);
+
+    // マスは残す。数字だけ隠す
     btn.classList.remove('flashNumber','done');
     btn.classList.add('hiddenNumber');
   }else{
     btn.classList.add('done');
   }
 
-  if(n===S.numberMax){
+  // 最後の数字まで到達
+  if(n>=S.numberMax){
     clearInterval(S.numberTimer);
     clearTimeout(S.numberFlashTimer);
     clearTimeout(S.numberNextTimer);
@@ -826,11 +839,12 @@ function numberTap(btn){
     return;
   }
 
-  S.numberNext++;
-  $('#nextNumber').textContent=S.numberNext;
+  const next=n+1;
+  S.numberNext=next;
+  $('#nextNumber').textContent=next;
 
   if(S.difficulty==='advanced'){
-    S.numberNextTimer=setTimeout(flashAdvancedNumber,250);
+    S.numberNextTimer=setTimeout(()=>flashAdvancedNumber(next),250);
   }
 }
 
