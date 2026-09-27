@@ -182,7 +182,7 @@ padding:12px 16px;border-radius:13px;font-weight:800;text-align:center;backdrop-
   <section id="screenTop" class="screen active">
     <div class="topHeader">
       <h1>⚾ 野球ビジョントレーナー</h1>
-      <div class="sub">視覚・反応・判断・ルール　<span class="version">v1.6</span></div>
+      <div class="sub">視覚・反応・判断・ルール　<span class="version">v1.7</span></div>
     </div>
 
     <section class="card">
@@ -411,7 +411,7 @@ const descs={
 const S={
   mode:'course',speed:120,batter:'left',difficulty:null,running:false,round:0,
   answer:null,startTs:0,streak:0,bestStreak:0,ready:false,timer:null,
-  totalPoints:0,numberNext:1,numberStart:0,numberTimer:null,numberFlashTimer:null,
+  totalPoints:0,numberNext:1,numberStart:0,numberTimer:null,numberFlashTimer:null,numberNextTimer:null,
   numberMax:9,quizQuestions:[],quizIndex:0,quizCorrect:0,quizLocked:false,scoreQuestions:[],scoreIndex:0,scoreCorrect:0,scoreLocked:false
 };
 
@@ -468,7 +468,7 @@ function goTop(){
 }
 function stopAll(){
   S.running=false;S.ready=false;S.quizLocked=true;S.scoreLocked=true;
-  clearTimeout(S.timer);clearInterval(S.numberTimer);clearTimeout(S.numberFlashTimer);
+  clearTimeout(S.timer);clearInterval(S.numberTimer);clearTimeout(S.numberFlashTimer);clearTimeout(S.numberNextTimer);
   resetBall();
 }
 function openSettings(mode){
@@ -736,9 +736,14 @@ function startNumbers(){
   $('#numberGrid').className='numberGrid '+cls;
   $('#numberGrid').innerHTML=nums.map(n=>`<button data-number="${n}">${n}</button>`).join('');
   if(S.difficulty==='advanced'){
-    $('#numberHelp').textContent='次の数字が1秒だけ表示されます。消えた位置を覚えてタップ！';
-    $$('#numberGrid button').forEach(b=>b.classList.add('hiddenNumber'));
-    setTimeout(flashAdvancedNumber,350);
+    $('#numberHelp').textContent='次の数字が0.5秒だけ表示されます。消えた位置を覚えてタップ！';
+    clearTimeout(S.numberFlashTimer);
+    clearTimeout(S.numberNextTimer);
+    $$('#numberGrid button').forEach(b=>{
+      b.classList.remove('done','wrong','flashNumber');
+      b.classList.add('hiddenNumber');
+    });
+    S.numberNextTimer=setTimeout(flashAdvancedNumber,350);
   }else{
     $('#numberHelp').textContent=`1→${S.numberMax}をできるだけ速くタップ！`;
   }
@@ -747,36 +752,86 @@ function startNumbers(){
 }
 function flashAdvancedNumber(){
   if(!S.running||S.mode!=='numbers'||S.difficulty!=='advanced')return;
+
   clearTimeout(S.numberFlashTimer);
+
   const btn=$(`#numberGrid button[data-number="${S.numberNext}"]`);
-  if(!btn)return;
-  btn.classList.remove('hiddenNumber');btn.classList.add('flashNumber');
-  S.numberFlashTimer=setTimeout(()=>{btn.classList.add('hiddenNumber');btn.classList.remove('flashNumber')},1000);
+  if(!btn){
+    clearTimeout(S.numberNextTimer);
+    S.numberNextTimer=setTimeout(flashAdvancedNumber,150);
+    return;
+  }
+
+  $$('#numberGrid button').forEach(b=>{
+    b.classList.remove('flashNumber');
+    b.classList.add('hiddenNumber');
+  });
+
+  btn.classList.remove('hiddenNumber');
+  btn.classList.add('flashNumber');
+
+  S.numberFlashTimer=setTimeout(()=>{
+    if(!S.running||S.mode!=='numbers'||S.difficulty!=='advanced')return;
+    btn.classList.add('hiddenNumber');
+    btn.classList.remove('flashNumber');
+  },500);
 }
 function numberTap(btn){
   if(!S.running||S.mode!=='numbers')return;
   const n=Number(btn.dataset.number);
+
   if(n!==S.numberNext){
-    btn.classList.add('wrong');setTimeout(()=>btn.classList.remove('wrong'),220);
-    if(S.difficulty==='advanced')setTimeout(flashAdvancedNumber,400);
+    btn.classList.add('wrong');
+    setTimeout(()=>btn.classList.remove('wrong'),220);
+
+    if(S.difficulty==='advanced'){
+      clearTimeout(S.numberNextTimer);
+      S.numberNextTimer=setTimeout(flashAdvancedNumber,250);
+    }
     return;
   }
-  btn.classList.add('done');btn.classList.remove('hiddenNumber','flashNumber');
+
+  if(S.difficulty==='advanced'){
+    clearTimeout(S.numberFlashTimer);
+    clearTimeout(S.numberNextTimer);
+    btn.classList.remove('flashNumber','done');
+    btn.classList.add('hiddenNumber');
+  }else{
+    btn.classList.add('done');
+  }
+
   if(n===S.numberMax){
-    clearInterval(S.numberTimer);clearTimeout(S.numberFlashTimer);
+    clearInterval(S.numberTimer);
+    clearTimeout(S.numberFlashTimer);
+    clearTimeout(S.numberNextTimer);
+
     const elapsed=performance.now()-S.numberStart;
     const oldBest=getNumberBest(S.difficulty);
-    const isFirst=!oldBest,isBest=!!oldBest&&elapsed<oldBest;
+    const isFirst=!oldBest;
+    const isBest=!!oldBest&&elapsed<oldBest;
+
     let pts=S.difficulty==='beginner'?50:S.difficulty==='intermediate'?80:120;
-    if(isFirst)setNumberBest(elapsed,S.difficulty);
-    else if(isBest){pts+=100;setNumberBest(elapsed,S.difficulty)}
+
+    if(isFirst){
+      setNumberBest(elapsed,S.difficulty);
+    }else if(isBest){
+      pts+=100;
+      setNumberBest(elapsed,S.difficulty);
+    }
+
     addPoints(pts);
+
     const head=isFirst?'🎯 初記録！':isBest?'🔥 自己ベスト更新！':'🎯 完了！';
     finishGeneric(head,`${(elapsed/1000).toFixed(2)} 秒\n+${pts} pt`);
     return;
   }
-  S.numberNext++;$('#nextNumber').textContent=S.numberNext;
-  if(S.difficulty==='advanced')setTimeout(flashAdvancedNumber,500);
+
+  S.numberNext++;
+  $('#nextNumber').textContent=S.numberNext;
+
+  if(S.difficulty==='advanced'){
+    S.numberNextTimer=setTimeout(flashAdvancedNumber,250);
+  }
 }
 
 /* RULE QUIZ */
